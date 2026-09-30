@@ -1,0 +1,54 @@
+# Crea lo zip installabile del plugin e lo allega alla Release.
+#
+# Si attiva quando pubblichi una Release su GitHub. Lo zip contiene una
+# cartella chiamata esattamente come il plugin: è quello che il sistema di
+# aggiornamento scarica sui siti. Senza questo passaggio WordPress userebbe
+# lo zip generato da GitHub, con il numero di versione nel nome della
+# cartella, e installerebbe il plugin come se fosse un altro.
+#
+# Per riusarlo in un altro plugin basta cambiare PLUGIN_SLUG.
+
+name: Zip del plugin per la Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+env:
+  PLUGIN_SLUG: lu3g-repeater-carousel
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Controlla che la versione corrisponda al tag
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(grep -m1 -E '^[[:space:]*]*Version:' "$PLUGIN_SLUG.php" | sed -E 's/.*Version:[[:space:]]*//' | tr -d '[:space:]')
+          echo "Tag: $TAG — Version nel plugin: $VERSION"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::Il tag ($TAG) non corrisponde a 'Version:' in $PLUGIN_SLUG.php ($VERSION). Aggiorna la versione nel plugin prima di pubblicare la Release."
+            exit 1
+          fi
+
+      - name: Crea lo zip
+        run: |
+          mkdir -p "build/$PLUGIN_SLUG"
+          rsync -a ./ "build/$PLUGIN_SLUG/" \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'build' \
+            --exclude '.gitignore' \
+            --exclude '.DS_Store'
+          cd build && zip -rq "$PLUGIN_SLUG.zip" "$PLUGIN_SLUG"
+          unzip -l "$PLUGIN_SLUG.zip" | tail -3
+
+      - name: Allega lo zip alla Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$GITHUB_REF_NAME" "build/$PLUGIN_SLUG.zip" --clobber

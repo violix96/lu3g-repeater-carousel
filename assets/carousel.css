@@ -1,0 +1,1150 @@
+/**
+ * LU3G Repeater Carousel
+ *
+ * Le variabili --lu3g-* vengono sovrascritte da Elementor tramite i controlli
+ * del widget. I valori qui sotto sono i fallback: servono se il widget viene
+ * usato senza impostazioni o se il CSS generato non è ancora stato rigenerato.
+ */
+
+.lu3g-carousel {
+	--lu3g-visible: 4;
+	--lu3g-peek: 60px;
+	--lu3g-card-width: 320px;
+	--lu3g-gap: 24px;
+	--lu3g-card-height: 340px;
+	--lu3g-arrow-gap: 24px;
+	--lu3g-arrow-offset: 16px;
+	--lu3g-indicator-gap: 24px;
+	--lu3g-dot-size: 8px;
+	--lu3g-dot-active-width: 24px;
+	--lu3g-dot-gap: 8px;
+	--lu3g-dot-color: rgba(27, 26, 71, .25);
+	--lu3g-dot-active-color: #1b1a47;
+	--lu3g-progress-height: 2px;
+	--lu3g-progress-track: rgba(27, 26, 71, .15);
+	--lu3g-progress-color: #1b1a47;
+	--lu3g-anim-offset: 24px;
+	--lu3g-anim-duration: 500ms;
+	--lu3g-anim-easing: cubic-bezier(.2, .7, .3, 1);
+	--lu3g-hover-duration: 250ms;
+	--lu3g-hover-distance: 6px;
+	--lu3g-hover-scale: 1.03;
+	--lu3g-lines: 3;
+	--lu3g-toggle-gap: 10px;
+	--lu3g-icon-size: 48px;
+	--lu3g-icon-gap: 16px;
+	--lu3g-bleed: 8px;
+	--lu3g-description-gap: 12px;
+	--lu3g-kicker-gap: 12px;
+	--lu3g-extra-1-gap: 12px;
+	--lu3g-extra-2-gap: 12px;
+	--lu3g-button-gap: 24px;
+	--lu3g-button-icon-size: .9em;
+	--lu3g-button-icon-gap: 8px;
+	--lu3g-button-icon-shift: 4px;
+	--lu3g-image-zoom: 1.05;
+
+	display: flex;
+	align-items: center;
+	gap: var(--lu3g-arrow-gap);
+	width: 100%;
+	min-width: 0;
+}
+
+/* La freccia sotto il carosello impila i due blocchi. */
+/* ---------------------------------------------------------------------------
+ * Posizione delle frecce
+ *
+ * Il wrapper è una riga flex: frecce e viewport stanno affiancati, separati
+ * da --lu3g-arrow-gap. Sopra e sotto il wrapper diventa una colonna; in
+ * sovrapposizione le frecce escono dal flusso e si posizionano sulle card.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel--arrows-above,
+.lu3g-carousel--arrows-below {
+	flex-direction: column;
+	align-items: stretch;
+}
+
+/* In colonna il viewport non può usare flex: 1 1 0. Con base zero e
+   overflow non visibile, il suo min-height automatico vale zero e il
+   carosello collasserebbe a un'altezza nulla. */
+.lu3g-carousel--arrows-above .lu3g-carousel__stage,
+.lu3g-carousel--arrows-below .lu3g-carousel__stage {
+	flex: 0 0 auto;
+	width: 100%;
+}
+
+/* Sovrapposte: il contenitore delle frecce copre il carosello ma lascia
+   passare i click e lo swipe, che arrivano alle card; solo le frecce
+   ricevono gli eventi. */
+.lu3g-carousel--arrows-overlay .lu3g-carousel__nav {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: var(--lu3g-arrow-offset);
+	right: var(--lu3g-arrow-offset);
+	z-index: 2;
+	justify-content: space-between;
+	pointer-events: none;
+}
+
+.lu3g-carousel--arrows-overlay .lu3g-carousel__arrow {
+	pointer-events: auto;
+}
+
+/* Una sola freccia sovrapposta va sul lato destro, dove punta lo scorrimento. */
+.lu3g-carousel--arrows-overlay[data-lu3g-mode="single"] .lu3g-carousel__nav {
+	justify-content: flex-end;
+}
+
+/* ---------------------------------------------------------------------------
+ * Viewport e track
+ * ------------------------------------------------------------------------ */
+
+/* Il viewport è l'elemento che scorre: min-width:0 gli impedisce di
+   dimensionarsi sul contenuto e di allargare il container padre.
+   scroll-behavior resta auto: lo scorrimento morbido lo produce il JS con
+   una durata regolabile, e lo smooth nativo combatterebbe con quello,
+   oltre a rendere visibile il salto del loop infinito. */
+/* Lo stage è l'elemento flessibile del wrapper e racchiude il viewport.
+   flow-root garantisce che il margine negativo del viewport resti dentro:
+   l'altezza dello stage coincide con l'area delle card, ed è il riferimento
+   per frecce e indicatori sovrapposti. */
+.lu3g-carousel__stage {
+	position: relative;
+	display: flow-root;
+	flex: 1 1 0;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.lu3g-carousel__viewport {
+	min-width: 0;
+	max-width: 100%;
+	overflow-x: auto;
+	scroll-behavior: auto;
+	/* Impedisce allo slancio di propagarsi alla pagina o alla cronologia
+	   quando si arriva a un capo: su mobile è una delle cause degli scatti. */
+	overscroll-behavior-x: contain;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+	/* overflow-x: auto rende automaticamente auto anche overflow-y: il
+	   viewport taglia tutto ciò che sporge in verticale, anche di mezzo
+	   pixel. Senza margine, bordi inferiori, sollevamento in hover e ombre
+	   vengono troncati. Il padding sposta il bordo di taglio lontano dalle
+	   card; il margine negativo lo compensa, così il layout non cambia. */
+	padding-block: var(--lu3g-bleed);
+	margin-block: calc(var(--lu3g-bleed) * -1);
+	/* Niente pointer-events: none qui, anche se renderebbe la fascia di
+	   margine trasparente ai click. Su iOS Safari lo scorrimento al tocco
+	   dipende dal contenitore che scorre: con pointer-events: none il
+	   carosello non risponde allo swipe, anche toccando le card. Le frecce
+	   restano cliccabili perché sono disegnate sopra lo stage (z-index su
+	   .lu3g-carousel__nav). */
+}
+
+.lu3g-carousel__viewport::-webkit-scrollbar {
+	display: none;
+}
+
+.lu3g-carousel__viewport:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 4px;
+}
+
+.lu3g-carousel--snap .lu3g-carousel__viewport {
+	scroll-snap-type: x mandatory;
+}
+
+.lu3g-carousel__track {
+	display: flex;
+	flex-wrap: nowrap;
+	/* stretch, non flex-start: in altezza automatica tutte le card
+	   prendono l'altezza della più alta invece di adattarsi al proprio
+	   testo, così la riga resta allineata. */
+	align-items: stretch;
+	gap: var(--lu3g-gap);
+	width: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+ * Card
+ *
+ * Larghezza = spazio disponibile, meno i gap tra le card, meno lo spazio
+ * riservato all'anteprima della successiva, diviso il numero di card visibili.
+ * Con --lu3g-peek a zero si ottengono card esatte senza taglio.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel__card {
+	flex: 0 0 calc(
+		(100% - (var(--lu3g-visible) - 1) * var(--lu3g-gap) - var(--lu3g-peek))
+		/ var(--lu3g-visible)
+	);
+	/* min-width e max-width impediscono al contenuto di allargare la card:
+	   senza, una parola lunga o un'immagine sforerebbero la base calcolata
+	   e le card avrebbero larghezze diverse. */
+	min-width: 0;
+	max-width: calc(
+		(100% - (var(--lu3g-visible) - 1) * var(--lu3g-gap) - var(--lu3g-peek))
+		/ var(--lu3g-visible)
+	);
+	box-sizing: border-box;
+	display: flex;
+	align-items: flex-end;
+	margin: 0;
+	padding: 24px;
+	border: 1px solid #1b1a47;
+	border-radius: 12px;
+	background: #f4f4f6;
+	color: inherit;
+	text-decoration: none;
+	overflow-wrap: break-word;
+	will-change: transform;
+	transition:
+		background var(--lu3g-hover-duration) ease,
+		border-color var(--lu3g-hover-duration) ease,
+		box-shadow var(--lu3g-hover-duration) ease,
+		transform var(--lu3g-hover-duration) ease;
+}
+
+/* Larghezza fissa: ignora il calcolo e usa il valore impostato. Il numero
+   di card a schermo diventa una conseguenza dello spazio disponibile. */
+.lu3g-carousel--fixed-width .lu3g-carousel__card {
+	flex: 0 0 var(--lu3g-card-width);
+	max-width: var(--lu3g-card-width);
+}
+
+.lu3g-carousel--snap .lu3g-carousel__card {
+	scroll-snap-align: start;
+}
+
+.lu3g-carousel--fixed-height .lu3g-carousel__card {
+	height: var(--lu3g-card-height);
+	/* Con altezza fissa un testo troppo lungo uscirebbe dal bordo:
+	   meglio tagliarlo dentro la card. Se succede spesso, conviene
+	   disattivare l'altezza fissa o attivare il troncamento. */
+	overflow: hidden;
+}
+
+/* In altezza automatica il valore fa da minimo: le card più corte lo
+   rispettano, e lo stretch del track allinea tutte alla più alta. */
+.lu3g-carousel:not(.lu3g-carousel--fixed-height) .lu3g-carousel__card {
+	min-height: var(--lu3g-card-height);
+}
+
+/* Il body dispone icona e contenuto. La direzione la imposta il controllo
+   di posizione dell'icona, per breakpoint. Il contenuto testuale sta in un
+   wrapper proprio così che testo e pulsante restino impilati qualunque sia
+   la direzione, e la sottolineatura in hover si dimensioni sul testo. */
+.lu3g-carousel__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--lu3g-icon-gap);
+	width: 100%;
+	min-width: 0;
+}
+
+.lu3g-carousel__content {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/* Con l'icona di lato il gruppo resta allineato in alto: centrarlo
+   sballerebbe l'allineamento su card con testi di lunghezza diversa. */
+.lu3g-carousel__icon {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: flex-start;
+	line-height: 0;
+	color: inherit;
+	transition: color var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel__icon svg,
+.lu3g-carousel__icon img {
+	width: var(--lu3g-icon-size);
+	height: var(--lu3g-icon-size);
+	max-width: 100%;
+	object-fit: contain;
+	transition: fill var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel__icon i {
+	font-size: var(--lu3g-icon-size);
+	line-height: 1;
+}
+
+/* Un SVG senza fill esplicito prende il colore del testo, così il controllo
+   colore funziona anche sulle icone esportate senza attributi. */
+.lu3g-carousel__icon svg:not([fill]) {
+	fill: currentColor;
+}
+
+/* ---------------------------------------------------------------------------
+ * Scorrimento infinito
+ *
+ * Il JS duplica il set di card prima e dopo l'originale. I cloni sono
+ * identici a vista ma esclusi da lettori di schermo e tastiera.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel--looping .lu3g-carousel__viewport {
+	/* Lo snap mandatory riaggancerebbe la posizione durante il salto di un
+	   set intero, rendendolo visibile. Con il loop lo snap è di prossimità:
+	   allinea dopo uno swipe manuale senza interferire. */
+	scroll-snap-type: x proximity;
+}
+
+.lu3g-carousel__card.is-clone {
+	user-select: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Troncamento
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel--clamp .lu3g-carousel__clamp {
+	display: -webkit-box;
+	-webkit-line-clamp: var(--lu3g-lines);
+	line-clamp: var(--lu3g-lines);
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* Card espansa: l'altezza fissa e il taglio vengono sospesi, altrimenti
+   il testo aperto resterebbe nascosto. */
+.lu3g-carousel--clamp .lu3g-carousel__card.is-expanded {
+	height: auto;
+	overflow: visible;
+}
+
+.lu3g-carousel--clamp .lu3g-carousel__card.is-expanded .lu3g-carousel__clamp {
+	display: block;
+	-webkit-line-clamp: none;
+	line-clamp: none;
+	overflow: visible;
+}
+
+/* Il pulsante nasce hidden: il JS lo mostra solo sulle card in cui il
+   testo è davvero tagliato.
+
+   Il reset usa !important sulle proprietà che i temi impostano in modo
+   aggressivo sui button (sfondo, gradiente, ombra, bordo). Senza, i
+   controlli del pannello non avrebbero effetto su temi come JupiterX. */
+.lu3g-carousel .lu3g-carousel__body .lu3g-carousel__toggle {
+	display: inline-block;
+	width: auto;
+	margin: var(--lu3g-toggle-gap) 0 0;
+	padding: 0;
+	border: none !important;
+	border-radius: 0;
+	background: none !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	box-shadow: none !important;
+	color: inherit;
+	font: inherit;
+	letter-spacing: inherit;
+	text-align: inherit;
+	text-transform: none;
+	text-decoration: none;
+	text-underline-offset: 3px;
+	line-height: inherit;
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+	transition: color var(--lu3g-hover-duration) ease, background-color var(--lu3g-hover-duration) ease, opacity var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel .lu3g-carousel__body .lu3g-carousel__toggle:hover,
+.lu3g-carousel .lu3g-carousel__body .lu3g-carousel__toggle:focus,
+.lu3g-carousel .lu3g-carousel__body .lu3g-carousel__toggle:active {
+	box-shadow: none !important;
+	transform: none;
+}
+
+.lu3g-carousel .lu3g-carousel__body .lu3g-carousel__toggle[hidden] {
+	display: none;
+}
+
+/* Feedback di default quando si passa sulla card. È una variabile perché
+   con uno sfondo pieno impostato dal pannello lo sbiadimento sarebbe
+   sbagliato: in quel caso si porta a 1 e comandano i colori dei controlli. */
+.lu3g-carousel .lu3g-carousel__card:hover .lu3g-carousel__body .lu3g-carousel__toggle {
+	opacity: var(--lu3g-toggle-hover-opacity, 1);
+}
+
+.lu3g-carousel .lu3g-carousel__body .lu3g-carousel__toggle:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+/* Stato temporaneo usato dal JS per misurare l'altezza reale del testo
+   senza il clamp. Viene applicato e rimosso nello stesso frame, quindi
+   non produce sfarfallio. */
+.lu3g-carousel--clamp .lu3g-carousel__clamp.is-measuring {
+	display: block;
+	-webkit-line-clamp: none;
+	line-clamp: none;
+	overflow: visible;
+}
+
+a.lu3g-carousel__card:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+/* I campi WYSIWYG avvolgono il testo in <p>: i margini di default
+   romperebbero l'allineamento verticale della card. */
+.lu3g-carousel__text > *:first-child {
+	margin-top: 0;
+}
+
+.lu3g-carousel__text > *:last-child {
+	margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Frecce
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel__nav {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: 12px;
+}
+
+/* Frecce e indicatori fuori dallo stage vengono disegnati sopra di esso:
+   lo stage è posizionato, e senza z-index l'ombra delle card in hover
+   passerebbe sopra le frecce vicine. */
+.lu3g-carousel > .lu3g-carousel__nav,
+.lu3g-carousel > .lu3g-carousel__indicators {
+	position: relative;
+	z-index: 3;
+}
+
+
+/* Reset del button.
+   La specificità doppia serve a battere i temi che stilizzano i button
+   in modo generico (JupiterX, Astra e simili applicano bordo e sfondo a
+   tutti i button dentro i contenuti). */
+.lu3g-carousel .lu3g-carousel__arrow {
+	--lu3g-arrow-size: 28px;
+
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: content-box;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background: none;
+	background-color: transparent;
+	box-shadow: none;
+	color: #1b1a47;
+	fill: #1b1a47;
+	font: inherit;
+	line-height: 1;
+	text-decoration: none;
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+	transition: opacity .2s ease, transform .2s ease, background-color .2s ease, border-color .2s ease;
+}
+
+.lu3g-carousel .lu3g-carousel__arrow:hover,
+.lu3g-carousel .lu3g-carousel__arrow:focus,
+.lu3g-carousel .lu3g-carousel__arrow:active {
+	box-shadow: none;
+	outline: none;
+}
+
+.lu3g-carousel__arrow svg,
+.lu3g-carousel__arrow i {
+	width: var(--lu3g-arrow-size);
+	height: var(--lu3g-arrow-size);
+	font-size: var(--lu3g-arrow-size);
+	/* il click deve arrivare al button, non all'icona */
+	pointer-events: none;
+}
+
+.lu3g-carousel__arrow:hover {
+	opacity: .7;
+}
+
+.lu3g-carousel__arrow:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 4px;
+}
+
+.lu3g-carousel__arrow.is-disabled {
+	opacity: .3;
+	pointer-events: none;
+}
+
+/* Nella modalità a freccia singola l'icona si specchia quando la direzione
+   si inverte a fine corsa. */
+.lu3g-carousel__arrow.is-flipped {
+	transform: scaleX(-1);
+}
+
+/* ---------------------------------------------------------------------------
+ * Margine di sicurezza del viewport
+ *
+ * Quanto spazio lasciare sopra e sotto le card dipende da quanto l'effetto
+ * hover le fa sporgere. Il minimo copre bordi e arrotondamenti subpixel.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel--hover-lift,
+.lu3g-carousel--hover-sink {
+	--lu3g-bleed: calc(var(--lu3g-hover-distance) + 8px);
+}
+
+.lu3g-carousel--hover-zoom,
+.lu3g-carousel--hover-tilt {
+	--lu3g-bleed: 20px;
+}
+
+/* L'ombra scende di 12px con 32px di sfocatura. */
+.lu3g-carousel--hover-glow {
+	--lu3g-bleed: 48px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Effetti hover
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel--hover-lift .lu3g-carousel__card:hover {
+	transform: translateY(calc(var(--lu3g-hover-distance) * -1));
+}
+
+.lu3g-carousel--hover-sink .lu3g-carousel__card:hover {
+	transform: translateY(var(--lu3g-hover-distance));
+}
+
+.lu3g-carousel--hover-zoom .lu3g-carousel__card:hover,
+.lu3g-carousel--hover-shrink .lu3g-carousel__card:hover {
+	transform: scale(var(--lu3g-hover-scale));
+}
+
+.lu3g-carousel--hover-tilt .lu3g-carousel__card:hover {
+	transform: perspective(800px) rotateX(4deg) rotateY(-4deg);
+}
+
+.lu3g-carousel--hover-glow .lu3g-carousel__card:hover {
+	box-shadow: 0 12px 32px rgba(0, 0, 0, .12);
+}
+
+/* Effetti sul testo. Il contenitore serve alla sottolineatura, che si
+   disegna con uno pseudo-elemento invece che con text-decoration così
+   può essere animata. */
+.lu3g-carousel__text {
+	display: block;
+	width: 100%;
+	line-height: 1.2;
+	color: #1b1a47;
+	transition:
+		color var(--lu3g-hover-duration) ease,
+		transform var(--lu3g-hover-duration) ease;
+}
+
+/* Il tag del titolo è solo semantica: un H3 non deve portarsi dietro
+   dimensione, peso e margini che il tema assegna agli heading. L'aspetto
+   lo decide il controllo Tipografia, i cui selettori generati da Elementor
+   hanno specificità più alta di questo reset. */
+.lu3g-carousel .lu3g-carousel__text {
+	margin: 0;
+	padding: 0;
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	text-transform: inherit;
+}
+
+/* ---------------------------------------------------------------------------
+ * Indicatori di posizione
+ *
+ * Sopra e sotto, il wrapper va a capo: gli indicatori occupano una riga
+ * intera. Quando il wrapper è una riga (frecce di lato) la distanza verticale
+ * è solo quella degli indicatori; in colonna (frecce sopra o sotto) il gap
+ * del wrapper separa già gli elementi, e il margine ne tiene conto.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel--has-indicators {
+	flex-wrap: wrap;
+}
+
+.lu3g-carousel--has-indicators:not(.lu3g-carousel--arrows-above):not(.lu3g-carousel--arrows-below) {
+	row-gap: 0;
+}
+
+.lu3g-carousel__indicators {
+	display: flex;
+	flex: 0 0 100%;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+}
+
+.lu3g-carousel__indicators[hidden] {
+	display: none;
+}
+
+.lu3g-carousel--indicators-below > .lu3g-carousel__indicators {
+	margin-top: var(--lu3g-indicator-gap);
+}
+
+.lu3g-carousel--indicators-above > .lu3g-carousel__indicators {
+	margin-bottom: var(--lu3g-indicator-gap);
+}
+
+.lu3g-carousel--arrows-above > .lu3g-carousel__indicators,
+.lu3g-carousel--arrows-below > .lu3g-carousel__indicators {
+	flex: 0 0 auto;
+}
+
+.lu3g-carousel--arrows-above.lu3g-carousel--indicators-below > .lu3g-carousel__indicators,
+.lu3g-carousel--arrows-below.lu3g-carousel--indicators-below > .lu3g-carousel__indicators {
+	margin-top: calc(var(--lu3g-indicator-gap) - var(--lu3g-arrow-gap));
+}
+
+.lu3g-carousel--arrows-above.lu3g-carousel--indicators-above > .lu3g-carousel__indicators,
+.lu3g-carousel--arrows-below.lu3g-carousel--indicators-above > .lu3g-carousel__indicators {
+	margin-bottom: calc(var(--lu3g-indicator-gap) - var(--lu3g-arrow-gap));
+}
+
+/* Sovrapposti: in basso sulle card, lasciando passare click e swipe. */
+.lu3g-carousel__stage > .lu3g-carousel__indicators {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: var(--lu3g-indicator-gap);
+	z-index: 2;
+	pointer-events: none;
+}
+
+.lu3g-carousel__stage > .lu3g-carousel__indicators > * {
+	pointer-events: auto;
+}
+
+/* Tra le frecce: prendono solo lo spazio che serve. La barra non ha una
+   larghezza naturale, quindi le si dà uno spazio fisso. */
+.lu3g-carousel__nav > .lu3g-carousel__indicators {
+	flex: 0 0 auto;
+}
+
+.lu3g-carousel__nav > .lu3g-carousel__indicators--progress {
+	flex: 0 0 160px;
+}
+
+/* Puntini */
+.lu3g-carousel__indicators--dots {
+	gap: var(--lu3g-dot-gap);
+}
+
+.lu3g-carousel .lu3g-carousel__dot {
+	flex: 0 0 auto;
+	width: var(--lu3g-dot-size);
+	height: var(--lu3g-dot-size);
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	background: var(--lu3g-dot-color);
+	box-shadow: none;
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+	transition:
+		width var(--lu3g-hover-duration) ease,
+		background-color var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel .lu3g-carousel__dot.is-active {
+	width: var(--lu3g-dot-active-width);
+	background: var(--lu3g-dot-active-color);
+}
+
+.lu3g-carousel .lu3g-carousel__dot:focus-visible {
+	outline: 2px solid var(--lu3g-dot-active-color);
+	outline-offset: 3px;
+}
+
+/* Barra */
+.lu3g-carousel__progress {
+	position: relative;
+	width: 100%;
+	max-width: 100%;
+	height: var(--lu3g-progress-height);
+	overflow: hidden;
+	border-radius: 999px;
+	background: var(--lu3g-progress-track);
+}
+
+.lu3g-carousel__progress-bar {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: 0;
+	border-radius: inherit;
+	background: var(--lu3g-progress-color);
+	transition: width var(--lu3g-hover-duration) ease;
+}
+
+/* Numeri */
+.lu3g-carousel__fraction {
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+	color: #1b1a47;
+}
+
+@media (max-width: 767px) {
+	.lu3g-carousel--hide-indicators-mobile .lu3g-carousel__indicators {
+		display: none;
+	}
+}
+
+/* ---------------------------------------------------------------------------
+ * Card con immagine di sfondo
+ *
+ * Tre livelli: l'immagine è lo sfondo della card, la velatura è uno
+ * pseudo-elemento sopra di essa, i testi stanno sopra la velatura. Colore e
+ * intensità della velatura sono variabili impostate dal pannello; l'intensità
+ * cambia in hover con una transizione. isolation crea un contesto proprio,
+ * così lo z-index dei livelli non interferisce con frecce e indicatori.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel__card--has-bg {
+	position: relative;
+	isolation: isolate;
+}
+
+.lu3g-carousel__card--has-bg::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	border-radius: inherit;
+	background-color: var(--lu3g-overlay-color, #000);
+	opacity: var(--lu3g-overlay-opacity, 0);
+	pointer-events: none;
+	transition: opacity var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel__card--has-bg > .lu3g-carousel__body {
+	position: relative;
+	z-index: 1;
+}
+
+/* ---------------------------------------------------------------------------
+ * Card immagine
+ *
+ * La foto è posizionata sopra l'intera card, padding compreso: il padding
+ * impostato per le card di testo non crea cornici attorno alle immagini.
+ * La card ritaglia la foto ai suoi bordi arrotondati; lo zoom in hover
+ * agisce sulla foto, che si ingrandisce dentro la card ferma.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel__card--image {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+}
+
+.lu3g-carousel .lu3g-carousel__image {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	border-radius: 0;
+	object-fit: cover;
+	object-position: center center;
+	transition: transform calc(var(--lu3g-hover-duration) * 2) ease;
+}
+
+.lu3g-carousel__card--image:hover .lu3g-carousel__image {
+	transform: scale(var(--lu3g-image-zoom));
+}
+
+/* Velatura in hover: il colore lo imposta il pannello; senza, resta
+   trasparente e non si vede. */
+.lu3g-carousel__card--image::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background-color: transparent;
+	pointer-events: none;
+	transition: background-color var(--lu3g-hover-duration) ease;
+}
+
+a.lu3g-carousel__card--image {
+	cursor: zoom-in;
+}
+
+a.lu3g-carousel__card--image[data-elementor-open-lightbox="no"] {
+	cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------------
+ * Blocchi di testo
+ *
+ * Ogni blocco — il primo, ex descrizione, e quelli aggiunti — porta la
+ * classe dello stile scelto nella card. La distanza dal blocco sopra è una
+ * proprietà dello stile: due blocchi con lo stesso stile hanno la stessa
+ * spaziatura, ovunque siano nella card.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel__block {
+	display: block;
+	line-height: 1.45;
+	transition: color var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel__block--style-1 {
+	margin: var(--lu3g-description-gap) 0 0;
+}
+
+.lu3g-carousel__block--style-2 {
+	margin: var(--lu3g-extra-1-gap) 0 0;
+}
+
+.lu3g-carousel__block--style-3 {
+	margin: var(--lu3g-extra-2-gap) 0 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Etichetta
+ * ------------------------------------------------------------------------ */
+
+/* Testo breve sopra il titolo. Il maiuscoletto spaziato è solo il punto di
+   partenza, la tipografia del pannello lo sovrascrive. */
+.lu3g-carousel__kicker {
+	display: block;
+	margin: 0 0 var(--lu3g-kicker-gap);
+	font-size: .75em;
+	line-height: 1.3;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+	transition: color var(--lu3g-hover-duration) ease;
+}
+
+/* L'editor visuale avvolge il testo in paragrafi: niente margine sopra il
+   primo e sotto l'ultimo, così la distanza tra i blocchi è solo quella
+   impostata nel pannello. Tra un paragrafo e l'altro resta uno spazio. */
+.lu3g-carousel__block > :first-child {
+	margin-top: 0;
+}
+
+.lu3g-carousel__block > :last-child {
+	margin-bottom: 0;
+}
+
+.lu3g-carousel__block p {
+	margin: 0 0 .75em;
+}
+
+.lu3g-carousel__block p:last-child {
+	margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Pulsante della card
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel__actions {
+	display: flex;
+	justify-content: flex-start;
+	margin-top: var(--lu3g-button-gap);
+}
+
+/* Reset come per le frecce: i temi stilizzano i link e i pulsanti in modo
+   generico, e senza specificità doppia il pannello non avrebbe effetto. */
+.lu3g-carousel .lu3g-carousel__button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--lu3g-button-icon-gap);
+	margin: 0;
+	padding: 0;
+	border: 0 solid currentColor;
+	background: none;
+	color: inherit;
+	font: inherit;
+	line-height: 1.2;
+	text-decoration: none;
+	box-shadow: none;
+	cursor: pointer;
+	transition:
+		color var(--lu3g-hover-duration) ease,
+		background-color var(--lu3g-hover-duration) ease,
+		border-color var(--lu3g-hover-duration) ease;
+}
+
+span.lu3g-carousel__button {
+	cursor: default;
+}
+
+.lu3g-carousel .lu3g-carousel__button:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 4px;
+}
+
+.lu3g-carousel__button-icon {
+	display: inline-flex;
+	line-height: 0;
+	transition: transform var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel__button-icon svg,
+.lu3g-carousel__button-icon i {
+	width: var(--lu3g-button-icon-size);
+	height: var(--lu3g-button-icon-size);
+	font-size: var(--lu3g-button-icon-size);
+	fill: currentColor;
+}
+
+/* La freccia avanza in hover sulla card intera, non solo sul pulsante. */
+.lu3g-carousel__card:hover .lu3g-carousel__button-icon {
+	transform: translateX(var(--lu3g-button-icon-shift));
+}
+
+/* ---------------------------------------------------------------------------
+ * Distribuzione "spread": contenuto in alto, pulsante in fondo
+ *
+ * Nella modalità raggruppata l'intero blocco viene ancorato in alto, al
+ * centro o in basso: con testi di lunghezza diversa, icone e titoli finiscono
+ * ad altezze diverse da una card all'altra. Qui invece ogni livello della
+ * catena occupa tutta l'altezza disponibile:
+ *
+ *   card (flex, già alta quanto la più alta grazie allo stretch del track)
+ *   └ body       align-self: stretch  → riempie la card in verticale
+ *     ├ icona    in cima, dimensione fissa → allineata tra le card
+ *     └ content  flex: 1, colonna      → prende lo spazio rimasto
+ *       ├ titolo, descrizione          → partono subito sotto l'icona
+ *       └ actions  margin-top: auto    → spinto in fondo alla card
+ *
+ * align-self sul body vince su align-items della card impostato dal pannello
+ * "Posizione del testo", indipendentemente dalla specificità del selettore.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel--spread .lu3g-carousel__body {
+	align-self: stretch;
+}
+
+.lu3g-carousel--spread .lu3g-carousel__content {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+}
+
+/* margin-top auto assorbe tutto lo spazio libero; il padding garantisce la
+   distanza minima dal testo quando la card è piena. */
+.lu3g-carousel--spread .lu3g-carousel__actions {
+	margin-top: auto;
+	padding-top: var(--lu3g-button-gap);
+}
+
+/* Il pulsante "Mostra di più" sta dentro un wrapper a blocco: in colonna
+   flex è il wrapper a occupare la riga, mentre il pulsante resta inline e
+   segue l'allineamento del testo impostato nel pannello. */
+.lu3g-carousel__toggle-wrap {
+	display: block;
+}
+
+/* Righe riservate al titolo: con 2, un titolo da una riga occupa comunque
+   lo spazio di due, e le descrizioni partono tutte alla stessa altezza.
+   La prima dichiarazione è il ripiego per i browser senza l'unità lh. */
+.lu3g-carousel .lu3g-carousel__text {
+	min-height: calc(var(--lu3g-title-lines, 0) * 1.2em);
+	min-height: calc(var(--lu3g-title-lines, 0) * 1lh);
+}
+
+.lu3g-carousel--text-shift .lu3g-carousel__card:hover .lu3g-carousel__text {
+	transform: translateX(8px);
+}
+
+.lu3g-carousel--text-rise .lu3g-carousel__card:hover .lu3g-carousel__text {
+	transform: translateY(-6px);
+}
+
+/* Il :not esclude il caso col troncamento attivo: display inline-block
+   disattiverebbe il -webkit-box del clamp, che ha la stessa specificità ma
+   viene prima nel foglio. Col clamp la sottolineatura copre l'intera
+   larghezza invece del solo testo, ed è un compromesso accettabile. */
+.lu3g-carousel--text-line .lu3g-carousel__text:not(.lu3g-carousel__clamp) {
+	position: relative;
+	display: inline-block;
+	width: auto;
+}
+
+.lu3g-carousel--text-line .lu3g-carousel__text.lu3g-carousel__clamp {
+	position: relative;
+}
+
+.lu3g-carousel--text-line .lu3g-carousel__text::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	bottom: -4px;
+	width: 100%;
+	height: 1px;
+	background: currentColor;
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel--text-line .lu3g-carousel__card:hover .lu3g-carousel__text::after {
+	transform: scaleX(1);
+}
+
+/* ---------------------------------------------------------------------------
+ * Animazione d'ingresso
+ *
+ * Un solo keyframe legge le variabili di partenza; ogni tipo di animazione
+ * si limita a impostarle. Aggiungere un tipo significa aggiungere una regola,
+ * non un keyframe.
+ *
+ * .is-armed viene aggiunta dal JS: senza script le card restano visibili.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel.is-armed .lu3g-carousel__card {
+	opacity: 0;
+}
+
+/* fill-mode backwards, non both: con both, a fine animazione l'ultimo
+   fotogramma resta applicato e il suo transform: none batte qualsiasi
+   regola normale, compreso il sollevamento in hover. backwards applica lo
+   stato iniziale solo durante il ritardo della cascata, poi si toglie di
+   mezzo; l'opacità finale la garantisce la regola stessa. */
+.lu3g-carousel.is-in-view .lu3g-carousel__card {
+	opacity: 1;
+	animation: lu3g-card-in var(--lu3g-anim-duration) var(--lu3g-anim-easing) backwards;
+	animation-delay: calc(var(--lu3g-i, 0) * var(--lu3g-stagger, 80ms));
+}
+
+@keyframes lu3g-card-in {
+	from {
+		opacity: 0;
+		transform:
+			translate3d(var(--lu3g-from-x, 0), var(--lu3g-from-y, 0), 0)
+			scale(var(--lu3g-from-scale, 1))
+			rotateX(var(--lu3g-from-rotate, 0deg));
+		filter: blur(var(--lu3g-from-blur, 0));
+		clip-path: var(--lu3g-from-clip, none);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+		filter: none;
+		clip-path: none;
+	}
+}
+
+.lu3g-carousel--in-slide-up .lu3g-carousel__card {
+	--lu3g-from-y: var(--lu3g-anim-offset);
+}
+
+.lu3g-carousel--in-slide-down .lu3g-carousel__card {
+	--lu3g-from-y: calc(var(--lu3g-anim-offset) * -1);
+}
+
+.lu3g-carousel--in-slide-right .lu3g-carousel__card {
+	--lu3g-from-x: calc(var(--lu3g-anim-offset) * -1);
+}
+
+.lu3g-carousel--in-slide-left .lu3g-carousel__card {
+	--lu3g-from-x: var(--lu3g-anim-offset);
+}
+
+.lu3g-carousel--in-zoom-in .lu3g-carousel__card {
+	--lu3g-from-scale: .9;
+}
+
+.lu3g-carousel--in-zoom-out .lu3g-carousel__card {
+	--lu3g-from-scale: 1.1;
+}
+
+.lu3g-carousel--in-blur .lu3g-carousel__card {
+	--lu3g-from-blur: 12px;
+}
+
+.lu3g-carousel--in-flip .lu3g-carousel__card {
+	--lu3g-from-rotate: -70deg;
+	transform-origin: center bottom;
+}
+
+.lu3g-carousel--in-flip .lu3g-carousel__track {
+	perspective: 1200px;
+}
+
+/* Lo scoprimento maschera la card e la scopre dal basso. */
+.lu3g-carousel--in-reveal .lu3g-carousel__card {
+	--lu3g-from-clip: inset(100% 0 0 0);
+	--lu3g-from-y: var(--lu3g-anim-offset);
+}
+
+/* La dissolvenza non imposta nulla: usa solo l'opacità del keyframe. */
+
+/* ---------------------------------------------------------------------------
+ * Stati vari
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel__empty {
+	padding: 20px;
+	border: 1px dashed currentColor;
+	border-radius: 8px;
+	opacity: .6;
+	font-size: 14px;
+}
+
+@media (max-width: 767px) {
+	.lu3g-carousel--hide-arrows-mobile .lu3g-carousel__nav {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lu3g-carousel__viewport {
+		scroll-behavior: auto;
+	}
+
+	.lu3g-carousel.is-armed .lu3g-carousel__card,
+	.lu3g-carousel.is-in-view .lu3g-carousel__card {
+		animation: none;
+		opacity: 1;
+		transform: none;
+		filter: none;
+		clip-path: none;
+	}
+
+	.lu3g-carousel__card,
+	.lu3g-carousel__text,
+	.lu3g-carousel__arrow,
+	.lu3g-carousel__dot,
+	.lu3g-carousel__progress-bar,
+	.lu3g-carousel__card--has-bg::before {
+		transition: none;
+	}
+
+	/* Gli effetti hover che spostano o scalano restano fermi; quelli di
+	   colore e ombra passano, perché non comportano movimento. */
+	.lu3g-carousel__card:hover,
+	.lu3g-carousel__card:hover .lu3g-carousel__text,
+	.lu3g-carousel__card:hover .lu3g-carousel__button-icon,
+	.lu3g-carousel__card--image:hover .lu3g-carousel__image {
+		transform: none;
+	}
+
+	.lu3g-carousel--text-line .lu3g-carousel__text::after {
+		transition: none;
+	}
+}
