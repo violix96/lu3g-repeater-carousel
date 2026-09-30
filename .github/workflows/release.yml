@@ -32,7 +32,7 @@ jobs:
           VERSION=$(grep -m1 -E '^[[:space:]*]*Version:' "$PLUGIN_SLUG.php" | sed -E 's/.*Version:[[:space:]]*//' | tr -d '[:space:]')
           echo "Tag: $TAG — Version nel plugin: $VERSION"
           if [ "$TAG" != "$VERSION" ]; then
-            echo "::error::Il tag ($TAG) non corrisponde a 'Version:' in $PLUGIN_SLUG.php ($VERSION). Aggiorna la versione nel plugin prima di pubblicare la Release."
+            echo "::error::Il tag ($TAG) non corrisponde a 'Version:' in $PLUGIN_SLUG.php ($VERSION). Il tag deve essere la versione esatta, es. 1.12.1 oppure v1.12.1 (niente V maiuscola o trattini bassi)."
             exit 1
           fi
 
