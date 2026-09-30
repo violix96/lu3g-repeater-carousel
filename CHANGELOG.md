@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.12.1
+- Modalità centrata: all'avvio è centrata la card di mezzo del gruppo visibile. Con 3 card visibili si vede subito piccola, grande, piccola, senza spazi vuoti.
+- La card centrale è in rilievo: ombra regolabile (attiva di default) e dimensione che può superare 1.
+- Corretto: l'ultima card non arrivava esattamente al centro in fondo al carosello.
+
 ## 1.12.0
 - Nuova *Modalità centrata* in *Layout*: la card attiva sta al centro, quelle ai lati sono più piccole e sbiadite, con dimensione e opacità regolabili. Funziona con scorrimento infinito, frecce, indicatori ed effetti hover.
 

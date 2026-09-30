@@ -12,6 +12,7 @@ use Elementor\Controls_Manager;
 use Elementor\Repeater;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
+use Elementor\Group_Control_Box_Shadow;
 use Elementor\Icons_Manager;
 use Elementor\Group_Control_Image_Size;
 
@@ -1349,7 +1350,7 @@ class Repeater_Carousel extends Widget_Base {
 				'default'      => '',
 				'return_value' => 'yes',
 				'separator'    => 'before',
-				'description'  => __( 'La card attiva sta al centro; quelle ai lati sono più piccole e sbiadite. L\'anteprima della card successiva si divide tra i due lati: per esempio 1 card visibile con anteprima al 40% mostra una card centrale al 60% e un 20% di quelle vicine per lato.', 'lu3g-carousel' ),
+				'description'  => __( 'La card di mezzo del gruppo visibile sta al centro, in rilievo; quelle ai lati sono più piccole e sbiadite. Usa un numero dispari di card visibili: con 3 vedi piccola, grande, piccola. L\'anteprima si divide tra i due lati.', 'lu3g-carousel' ),
 			)
 		);
 
@@ -1379,6 +1380,44 @@ class Repeater_Carousel extends Widget_Base {
 				'condition'  => array( 'center_mode' => 'yes' ),
 				'selectors'  => array(
 					'{{WRAPPER}} .lu3g-carousel' => '--lu3g-center-opacity: {{SIZE}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'center_main_scale',
+			array(
+				'label'       => __( 'Dimensione della card centrale', 'lu3g-carousel' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '' ),
+				'range'       => array( '' => array( 'min' => 1, 'max' => 1.2, 'step' => 0.01 ) ),
+				'default'     => array( 'size' => 1.04 ),
+				'description' => __( 'Sopra 1 la card centrale sporge leggermente sulle vicine.', 'lu3g-carousel' ),
+				'condition'   => array( 'center_mode' => 'yes' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .lu3g-carousel' => '--lu3g-center-main-scale: {{SIZE}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
+			array(
+				'name'           => 'center_shadow',
+				'label'          => __( 'Ombra della card centrale', 'lu3g-carousel' ),
+				'selector'       => '{{WRAPPER}} .lu3g-carousel--center .lu3g-carousel__track .lu3g-carousel__card.is-center',
+				'condition'      => array( 'center_mode' => 'yes' ),
+				'fields_options' => array(
+					'box_shadow_type' => array( 'default' => 'yes' ),
+					'box_shadow'      => array(
+						'default' => array(
+							'horizontal' => 0,
+							'vertical'   => 18,
+							'blur'       => 40,
+							'spread'     => -10,
+							'color'      => 'rgba(0,0,0,0.28)',
+						),
+					),
 				),
 			)
 		);

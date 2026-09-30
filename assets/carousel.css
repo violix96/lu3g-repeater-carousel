@@ -45,6 +45,7 @@
 	--lu3g-image-zoom: 1.05;
 	--lu3g-center-scale: .88;
 	--lu3g-center-opacity: .5;
+	--lu3g-center-main-scale: 1.04;
 
 	display: flex;
 	align-items: center;
@@ -737,10 +738,43 @@ a.lu3g-carousel__card:focus-visible {
 	--lu3g-cw: var(--lu3g-card-width);
 }
 
+/* Spazi alle estremità. Con le card calcolate dal numero visibile, lo spazio
+   è metà dell'anteprima: così,
+   con un numero dispari di card visibili, all'avvio è centrata quella di
+   mezzo del gruppo. Con 3 card e nessuna anteprima lo spazio è zero, e si
+   vede subito piccola-grande-piccola. Con 1 card visibile coincide con lo
+   spazio che centra la prima.
+   Con larghezza fissa il numero visibile non è definito: lo spazio centra
+   la prima card. */
+/* Gli spazi sono elementi della fila: il gap si applica anche tra loro e la
+   prima card, anche quando valgono zero. Il margine negativo lo compensa,
+   così la prima card parte esattamente a metà dell'anteprima. */
 .lu3g-carousel--center .lu3g-carousel__track::before,
 .lu3g-carousel--center .lu3g-carousel__track::after {
 	content: '';
-	flex: 0 0 max(0px, calc((100% - var(--lu3g-cw)) / 2 - var(--lu3g-gap)));
+	flex: 0 0 calc(var(--lu3g-peek) / 2);
+}
+
+.lu3g-carousel--center .lu3g-carousel__track::before {
+	margin-right: calc(var(--lu3g-gap) * -1);
+}
+
+/* Lo spazio finale ha sempre almeno 1px, tolto dal margine. Il browser calcola
+   la lunghezza da scorrere sulle dimensioni visive, e l'ultima card è
+   rimpicciolita: senza un elemento che segni la fine della fila, lo
+   scorrimento si fermerebbe prima che l'ultima card arrivi al centro. Un
+   elemento largo zero non viene contato. */
+.lu3g-carousel--center .lu3g-carousel__track::after {
+	flex-basis: calc(var(--lu3g-peek) / 2 + 1px);
+	margin-left: calc(var(--lu3g-gap) * -1 - 1px);
+}
+
+.lu3g-carousel--center.lu3g-carousel--fixed-width .lu3g-carousel__track::before {
+	flex-basis: max(0px, calc((100% - var(--lu3g-cw)) / 2));
+}
+
+.lu3g-carousel--center.lu3g-carousel--fixed-width .lu3g-carousel__track::after {
+	flex-basis: calc(max(0px, calc((100% - var(--lu3g-cw)) / 2)) + 1px);
 }
 
 .lu3g-carousel--center.lu3g-carousel--snap .lu3g-carousel__card {
@@ -758,8 +792,22 @@ a.lu3g-carousel__card:focus-visible {
 		transform var(--lu3g-hover-duration) ease;
 }
 
+/* In rilievo: la centrale sta sopra le vicine, quindi se è più grande di 1
+   e sporge le copre invece di finirci sotto. L'ombra la imposta il pannello. */
+.lu3g-carousel--center .lu3g-carousel__card {
+	position: relative;
+	z-index: 1;
+}
+
 .lu3g-carousel--center .lu3g-carousel__card.is-center {
-	scale: 1;
+	scale: var(--lu3g-center-main-scale);
+	z-index: 2;
+}
+
+/* Margine di sicurezza più ampio: ombra e ingrandimento della centrale
+   sporgono sopra e sotto, e il viewport li taglierebbe. */
+.lu3g-carousel.lu3g-carousel--center {
+	--lu3g-bleed: 56px;
 }
 
 /* L'opacità delle laterali vale solo quando l'animazione d'ingresso non la

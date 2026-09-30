@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.12.0
+Documentazione del plugin — versione 1.12.1
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -204,7 +204,9 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Spazio tra le card **R** | Distanza tra una card e l'altra. |
 | Altezza delle card **R** | Altezza, o altezza minima se non è fissa. |
 | Altezza fissa | Attivo: tutte le card hanno esattamente l'altezza indicata e il testo in eccesso viene tagliato. Spento: l'altezza è un minimo e le card crescono tutte insieme, restando uguali. |
-| Modalità centrata | La card attiva sta al centro; quelle ai lati sono più piccole e sbiadite. L'anteprima si divide tra i due lati. |
+| Modalità centrata | La card di mezzo del gruppo visibile sta al centro, in rilievo; quelle ai lati sono più piccole e sbiadite. Usa un numero dispari di card visibili. L'anteprima si divide tra i due lati. |
+| Dimensione della card centrale **R** | Da 1 a 1,2: sopra 1 sporge sulle vicine. |
+| Ombra della card centrale | Ombra di Elementor, attiva di default. |
 | Dimensione delle card laterali **R** | Da 0,6 a 1. |
 | Opacità delle card laterali | Da 0 a 1. |
 | Distribuzione del contenuto | *Raggruppato*: tutto il contenuto insieme, posizionato in alto, al centro o in basso. *Distribuito*: contenuto in alto e pulsante in fondo, con icone, titoli e pulsanti allineati tra le card. |
@@ -319,11 +321,12 @@ Su ogni card il plugin cerca il primo link nel titolo e poi nei blocchi di testo
 ### Carosello "vetrina" con la card centrale in evidenza
 
 1. *Layout → Modalità centrata*: attiva.
-2. **Card visibili** 1 e **Anteprima card successiva** 40%: la card centrale occupa il 60% della larghezza, e di ciascuna vicina si vede un 20%.
-3. **Dimensione** e **Opacità delle card laterali**: 0,88 e 0,5 sono un buon punto di partenza.
-4. Facoltativo: *Scorrimento infinito*, così ai lati ci sono sempre card, anche all'inizio e alla fine.
+2. **Card visibili** 3, **Anteprima** 0: all'avvio vedi piccola, grande, piccola. Serve un numero dispari di card visibili, così c'è una card "di mezzo".
+3. **Dimensione** e **Opacità delle card laterali**: 0,88 e 0,5 sono un buon punto di partenza. **Dimensione della card centrale** 1,04 e l'**ombra** di default la mettono in rilievo.
+4. Per mostrare un accenno di altre card ai lati, aumenta l'**Anteprima**: si divide a metà tra sinistra e destra.
+5. Facoltativo: *Scorrimento infinito*, così ai lati ci sono sempre card.
 
-Funziona anche col tipo di contenuto *Immagini*. Senza scorrimento infinito, la prima e l'ultima card hanno uno spazio vuoto sul lato esterno: è quello che permette loro di arrivare al centro.
+Con 1 card visibile e anteprima al 40% la card centrale occupa il 60% della larghezza: senza scorrimento infinito, all'inizio a sinistra c'è uno spazio vuoto, che permette alla prima card di stare al centro. Funziona anche col tipo di contenuto *Immagini*.
 
 ### Carosello che gira da solo
 
@@ -474,13 +477,16 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 
 **Immagine di sfondo delle card.** Tre livelli: l'immagine è il `background` della card, la velatura è uno pseudo-elemento `::before` con colore e intensità da variabili CSS, i testi stanno sopra con `z-index`. Dimensione, posizione e ripetizione arrivano dai controlli della riga, non dal CSS di base, perché lo sfondo generale delle card usa la forma abbreviata `background:`, che le azzera. Tutti i selettori richiedono la classe `--has-bg`, stampata solo con l'interruttore acceso e un'immagine scelta: spegnendolo l'immagine sparisce anche se resta salvata, e una velatura scura non copre mai per sbaglio una card a tinta unita.
 
-**Modalità centrata.** La fila ha due spazi vuoti alle estremità (`::before` e `::after` del track), larghi metà dello spazio attorno a una card, e le card si agganciano al centro con `scroll-snap-align: center`. La larghezza di riferimento `--lu3g-cw` è definita sul track: le percentuali si risolvono dove la variabile viene usata, nelle card e negli spazi, sulla stessa larghezza. Le card laterali si rimpiccioliscono con la proprietà `scale`, non con `transform`, così si sommano al sollevamento in hover invece di cancellarlo. La card attiva la segna il JS con `is-center`, cloni del loop compresi.
+**Modalità centrata.** La fila ha due spazi vuoti alle estremità (`::before` e `::after` del track), larghi metà dell'anteprima, con un margine negativo che compensa il gap: con un numero dispari di card visibili all'avvio è centrata quella di mezzo. Lo spazio finale ha sempre almeno 1px, perché il browser misura la lunghezza da scorrere sulle dimensioni visive e l'ultima card è rimpicciolita; e le card si agganciano al centro con `scroll-snap-align: center`. La larghezza di riferimento `--lu3g-cw` è definita sul track: le percentuali si risolvono dove la variabile viene usata, nelle card e negli spazi, sulla stessa larghezza. Le card laterali si rimpiccioliscono con la proprietà `scale`, non con `transform`, così si sommano al sollevamento in hover invece di cancellarlo. La card attiva la segna il JS con `is-center`, cloni del loop compresi.
 
 **Colori per singola card.** Usano `{{CURRENT_ITEM}}` di Elementor: ogni riga del repeater riceve una classe unica, stampata sulla card, con selettori più specifici di quelli generali.
 
 ---
 
 ## Cronologia delle versioni
+
+**1.12.1**
+- Modalità centrata: all'avvio è centrata la card di mezzo del gruppo visibile; card centrale in rilievo con ombra e dimensione regolabili.
 
 **1.12.0**
 - Modalità centrata, con dimensione e opacità delle card laterali regolabili.
