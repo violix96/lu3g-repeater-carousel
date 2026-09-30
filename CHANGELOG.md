@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.10.1
+- Versione di prova del sistema di aggiornamento automatico da GitHub. Nessuna modifica al funzionamento del carosello.
+
 ## 1.10.0
 - Nuova opzione *Link della card → Dal primo link nel testo* per la sorgente dinamica: il pulsante compare solo sulle card che hanno un link nei testi, e usa quel link.
 
