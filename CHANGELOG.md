@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.11.0
+- Nuova opzione *Frecce → Nascondi se non c'è niente da scorrere*: quando tutte le card sono già visibili le frecce spariscono invece di restare spente, e ricompaiono se la finestra si restringe.
+
 ## 1.10.1
 - Versione di prova del sistema di aggiornamento automatico da GitHub. Nessuna modifica al funzionamento del carosello.
 

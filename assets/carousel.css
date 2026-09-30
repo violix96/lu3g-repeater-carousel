@@ -1106,6 +1106,12 @@ span.lu3g-carousel__button {
 	font-size: 14px;
 }
 
+/* Frecce nascoste quando tutte le card sono già visibili. is-static la
+   aggiunge il JS, quindi senza JS le frecce restano come sono. */
+.lu3g-carousel--hide-idle-arrows.is-static .lu3g-carousel__nav {
+	display: none;
+}
+
 @media (max-width: 767px) {
 	.lu3g-carousel--hide-arrows-mobile .lu3g-carousel__nav {
 		display: none;

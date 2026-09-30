@@ -328,6 +328,10 @@
 		 * Aggiorna lo stato delle frecce in base alla posizione.
 		 */
 		function sync() {
+			// is-static segnala che tutte le card sono già visibili: il CSS la
+			// usa per nascondere le frecce, se richiesto nel pannello.
+			root.classList.toggle( 'is-static', track.scrollWidth - viewport.clientWidth <= 2 );
+
 			// In loop non si arriva mai a un capo: le frecce restano attive
 			// e la direzione non si inverte.
 			if ( loop ) {

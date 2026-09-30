@@ -1706,6 +1706,18 @@ class Repeater_Carousel extends Widget_Base {
 				'condition'    => array( 'show_arrows' => 'yes' ),
 			)
 		);
+
+		$this->add_control(
+			'hide_idle_arrows',
+			array(
+				'label'        => __( 'Nascondi se non c\'è niente da scorrere', 'lu3g-carousel' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => '',
+				'return_value' => 'yes',
+				'description'  => __( 'Quando tutte le card sono già visibili, le frecce spariscono invece di restare spente. Si ricalcola al ridimensionamento: su mobile, dove le card visibili sono meno, ricompaiono.', 'lu3g-carousel' ),
+				'condition'    => array( 'show_arrows' => 'yes' ),
+			)
+		);
 		$this->end_controls_section();
 	}
 
@@ -4532,6 +4544,7 @@ class Repeater_Carousel extends Widget_Base {
 				'height_mode'        => 'yes',
 				'scroll_snap'        => 'yes',
 				'hide_arrows_mobile' => '',
+				'hide_idle_arrows'   => '',
 				'link_target'        => '',
 				'item_format'        => '',
 				'link_field'         => '',
@@ -4717,6 +4730,10 @@ class Repeater_Carousel extends Widget_Base {
 
 		if ( 'yes' === $settings['scroll_snap'] ) {
 			$classes[] = 'lu3g-carousel--snap';
+		}
+
+		if ( 'yes' === $settings['hide_idle_arrows'] ) {
+			$classes[] = 'lu3g-carousel--hide-idle-arrows';
 		}
 
 		if ( 'yes' === $settings['hide_arrows_mobile'] ) {
