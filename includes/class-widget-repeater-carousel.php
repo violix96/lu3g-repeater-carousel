@@ -1342,6 +1342,48 @@ class Repeater_Carousel extends Widget_Base {
 		);
 
 		$this->add_control(
+			'center_mode',
+			array(
+				'label'        => __( 'Modalità centrata', 'lu3g-carousel' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => '',
+				'return_value' => 'yes',
+				'separator'    => 'before',
+				'description'  => __( 'La card attiva sta al centro; quelle ai lati sono più piccole e sbiadite. L\'anteprima della card successiva si divide tra i due lati: per esempio 1 card visibile con anteprima al 40% mostra una card centrale al 60% e un 20% di quelle vicine per lato.', 'lu3g-carousel' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'center_side_scale',
+			array(
+				'label'      => __( 'Dimensione delle card laterali', 'lu3g-carousel' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( '' ),
+				'range'      => array( '' => array( 'min' => 0.6, 'max' => 1, 'step' => 0.01 ) ),
+				'default'    => array( 'size' => 0.88 ),
+				'condition'  => array( 'center_mode' => 'yes' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .lu3g-carousel' => '--lu3g-center-scale: {{SIZE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'center_side_opacity',
+			array(
+				'label'      => __( 'Opacità delle card laterali', 'lu3g-carousel' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( '' ),
+				'range'      => array( '' => array( 'min' => 0, 'max' => 1, 'step' => 0.05 ) ),
+				'default'    => array( 'size' => 0.5 ),
+				'condition'  => array( 'center_mode' => 'yes' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .lu3g-carousel' => '--lu3g-center-opacity: {{SIZE}};',
+				),
+			)
+		);
+
+		$this->add_control(
 			'content_layout',
 			array(
 				'label'       => __( 'Distribuzione del contenuto', 'lu3g-carousel' ),
@@ -4553,6 +4595,7 @@ class Repeater_Carousel extends Widget_Base {
 				'hover_text_effect'  => 'none',
 				'card_width_mode'    => 'auto',
 				'content_layout'     => 'grouped',
+				'center_mode'        => '',
 				'kicker_field'       => '',
 				'gallery_images'     => array(),
 				'gallery_link'       => 'none',
@@ -4671,6 +4714,10 @@ class Repeater_Carousel extends Widget_Base {
 
 		if ( 'fixed' === $settings['card_width_mode'] ) {
 			$classes[] = 'lu3g-carousel--fixed-width';
+		}
+
+		if ( 'yes' === $settings['center_mode'] ) {
+			$classes[] = 'lu3g-carousel--center';
 		}
 
 		if ( 'spread' === $settings['content_layout'] ) {

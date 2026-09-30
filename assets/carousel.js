@@ -747,6 +747,67 @@
 		}
 
 		/* -----------------------------------------------------------------
+		 * Modalità centrata
+		 *
+		 * Segna con is-center la card il cui centro è più vicino a quello del
+		 * viewport. Si aggiorna durante lo scorrimento, al massimo una volta
+		 * per frame, così scala e opacità seguono il dito o l'animazione
+		 * delle frecce senza aspettare che lo scorrimento si fermi. I cloni
+		 * del loop sono inclusi: quando la card centrale è un clone, è quella
+		 * a dover apparire attiva.
+		 * -------------------------------------------------------------- */
+
+		var centerMode = root.classList.contains( 'lu3g-carousel--center' );
+		var centerFrame = null;
+		var centerCard = null;
+
+		function updateCenter() {
+			if ( ! centerMode ) {
+				return;
+			}
+
+			var box = viewport.getBoundingClientRect();
+			var middle = box.left + box.width / 2;
+			var best = null;
+			var bestDistance = Infinity;
+
+			Array.prototype.forEach.call( track.children, function ( card ) {
+				var r = card.getBoundingClientRect();
+				var distance = Math.abs( r.left + r.width / 2 - middle );
+
+				if ( distance < bestDistance ) {
+					bestDistance = distance;
+					best = card;
+				}
+			} );
+
+			if ( best === centerCard ) {
+				return;
+			}
+
+			if ( centerCard ) {
+				centerCard.classList.remove( 'is-center' );
+			}
+
+			if ( best ) {
+				best.classList.add( 'is-center' );
+			}
+
+			centerCard = best;
+		}
+
+		function scheduleCenter() {
+			if ( ! centerMode || centerFrame ) {
+				return;
+			}
+
+			centerFrame = window.requestAnimationFrame( function () {
+				centerFrame = null;
+				updateCenter();
+			} );
+		}
+
+		/* -----------------------------------------------------------------
 		 * Eventi
 		 * -------------------------------------------------------------- */
 
@@ -783,6 +844,7 @@
 
 			sync();
 			scheduleIndicators();
+			scheduleCenter();
 		}, { passive: true } );
 
 		window.addEventListener( 'resize', function () {
@@ -792,6 +854,7 @@
 
 			sync();
 			buildIndicators();
+			updateCenter();
 		} );
 
 		// Le immagini o i font che caricano dopo possono cambiare le misure.
@@ -802,10 +865,12 @@
 
 			sync();
 			buildIndicators();
+			updateCenter();
 		} );
 
 		sync();
 		buildIndicators();
+		updateCenter();
 
 		setupTruncation( root );
 		setupAnimation( root, reduced );

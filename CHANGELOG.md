@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.12.0
+- Nuova *Modalità centrata* in *Layout*: la card attiva sta al centro, quelle ai lati sono più piccole e sbiadite, con dimensione e opacità regolabili. Funziona con scorrimento infinito, frecce, indicatori ed effetti hover.
+
 ## 1.11.0
 - Nuova opzione *Frecce → Nascondi se non c'è niente da scorrere*: quando tutte le card sono già visibili le frecce spariscono invece di restare spente, e ricompaiono se la finestra si restringe.
 

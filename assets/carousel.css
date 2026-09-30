@@ -43,6 +43,8 @@
 	--lu3g-button-icon-gap: 8px;
 	--lu3g-button-icon-shift: 4px;
 	--lu3g-image-zoom: 1.05;
+	--lu3g-center-scale: .88;
+	--lu3g-center-opacity: .5;
 
 	display: flex;
 	align-items: center;
@@ -710,6 +712,65 @@ a.lu3g-carousel__card:focus-visible {
 }
 
 /* ---------------------------------------------------------------------------
+ * Modalità centrata
+ *
+ * La card attiva sta al centro del viewport. Perché anche la prima e l'ultima
+ * possano arrivarci, la fila ha due spazi vuoti alle estremità, larghi metà
+ * dello spazio che resta attorno a una card: con la card 0 in posizione di
+ * partenza, il suo centro coincide con quello del viewport.
+ *
+ * --lu3g-cw ripete la formula della larghezza delle card. È definita sul
+ * track: le percentuali si risolvono dove la variabile viene usata, cioè
+ * nelle card e negli spazi, entrambi figli del track, quindi sulla stessa
+ * larghezza di riferimento.
+ *
+ * Le card laterali si rimpiccioliscono con la proprietà "scale", non con
+ * "transform": così si sommano al sollevamento in hover, che usa transform,
+ * invece di cancellarlo.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel--center .lu3g-carousel__track {
+	--lu3g-cw: calc((100% - (var(--lu3g-visible) - 1) * var(--lu3g-gap) - var(--lu3g-peek)) / var(--lu3g-visible));
+}
+
+.lu3g-carousel--center.lu3g-carousel--fixed-width .lu3g-carousel__track {
+	--lu3g-cw: var(--lu3g-card-width);
+}
+
+.lu3g-carousel--center .lu3g-carousel__track::before,
+.lu3g-carousel--center .lu3g-carousel__track::after {
+	content: '';
+	flex: 0 0 max(0px, calc((100% - var(--lu3g-cw)) / 2 - var(--lu3g-gap)));
+}
+
+.lu3g-carousel--center.lu3g-carousel--snap .lu3g-carousel__card {
+	scroll-snap-align: center;
+}
+
+.lu3g-carousel--center .lu3g-carousel__card {
+	scale: var(--lu3g-center-scale);
+	transition:
+		scale var(--lu3g-anim-duration) var(--lu3g-anim-easing),
+		opacity var(--lu3g-anim-duration) var(--lu3g-anim-easing),
+		background var(--lu3g-hover-duration) ease,
+		border-color var(--lu3g-hover-duration) ease,
+		box-shadow var(--lu3g-hover-duration) ease,
+		transform var(--lu3g-hover-duration) ease;
+}
+
+.lu3g-carousel--center .lu3g-carousel__card.is-center {
+	scale: 1;
+}
+
+/* L'opacità delle laterali vale solo quando l'animazione d'ingresso non la
+   sta gestendo: prima dell'ingresso (is-armed senza is-in-view) le card
+   devono restare invisibili. */
+.lu3g-carousel--center:not(.is-armed) .lu3g-carousel__track .lu3g-carousel__card:not(.is-center),
+.lu3g-carousel--center.is-in-view .lu3g-carousel__track .lu3g-carousel__card:not(.is-center) {
+	opacity: var(--lu3g-center-opacity);
+}
+
+/* ---------------------------------------------------------------------------
  * Card con immagine di sfondo
  *
  * Tre livelli: l'immagine è lo sfondo della card, la velatura è uno
@@ -1143,6 +1204,11 @@ span.lu3g-carousel__button {
 
 	/* Gli effetti hover che spostano o scalano restano fermi; quelli di
 	   colore e ombra passano, perché non comportano movimento. */
+	.lu3g-carousel--center .lu3g-carousel__card {
+		scale: 1;
+		transition: none;
+	}
+
 	.lu3g-carousel__card:hover,
 	.lu3g-carousel__card:hover .lu3g-carousel__text,
 	.lu3g-carousel__card:hover .lu3g-carousel__button-icon,
