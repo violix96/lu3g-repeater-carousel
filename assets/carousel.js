@@ -918,6 +918,145 @@
 
 		setupTruncation( root );
 		setupAnimation( root, reduced );
+		setupRows( root, track );
+	}
+
+	/**
+	 * Allineamento riga per riga.
+	 *
+	 * Ogni elemento della card — icona, etichetta, titolo, "Mostra di più",
+	 * blocchi di testo — riceve come altezza minima quella del più alto
+	 * dello stesso tipo e posizione nelle altre card. Così un titolo su una
+	 * riga occupa lo spazio di quello su due, e i testi sotto partono tutti
+	 * alla stessa quota. Il pulsante resta in fondo grazie alla
+	 * distribuzione, che questa modalità include.
+	 *
+	 * Gli elementi si confrontano per tipo e ordine: il secondo blocco di
+	 * testo con il secondo blocco di testo. Se una card non ha un elemento
+	 * che le altre hanno, le righe successive di quella card slittano.
+	 *
+	 * @param {HTMLElement} root  Elemento del carosello.
+	 * @param {HTMLElement} track Contenitore delle card.
+	 */
+	function setupRows( root, track ) {
+		if ( ! root.classList.contains( 'lu3g-carousel--rows' ) ) {
+			return;
+		}
+
+		/**
+		 * Elementi da allineare di una card, con la loro chiave di riga.
+		 *
+		 * @param {HTMLElement} card Card.
+		 * @return {Array} Coppie [ chiave, elemento ].
+		 */
+		function rowsOf( card ) {
+			var list = [];
+			var seen = {};
+			var icon = card.querySelector( '.lu3g-carousel__icon' );
+			var content = card.querySelector( '.lu3g-carousel__content' );
+
+			if ( icon ) {
+				list.push( [ 'icon', icon ] );
+			}
+
+			if ( ! content ) {
+				return list;
+			}
+
+			Array.prototype.forEach.call( content.children, function ( el ) {
+				var kind = '';
+
+				if ( el.classList.contains( 'lu3g-carousel__kicker' ) ) {
+					kind = 'kicker';
+				} else if ( el.classList.contains( 'lu3g-carousel__text' ) ) {
+					kind = 'title';
+				} else if ( el.classList.contains( 'lu3g-carousel__toggle-wrap' ) ) {
+					kind = 'toggle';
+				} else if ( el.classList.contains( 'lu3g-carousel__block' ) ) {
+					kind = 'block';
+				}
+
+				if ( ! kind ) {
+					return;
+				}
+
+				seen[ kind ] = ( seen[ kind ] || 0 ) + 1;
+				list.push( [ kind + seen[ kind ], el ] );
+			} );
+
+			return list;
+		}
+
+		function equalize() {
+			if ( ! root.isConnected ) {
+				return;
+			}
+
+			var groups = {};
+
+			Array.prototype.forEach.call( track.children, function ( card ) {
+				rowsOf( card ).forEach( function ( pair ) {
+					var el = pair[ 1 ];
+
+					el.style.minHeight = '';
+
+					// Un testo aperto con "Mostra di più" non deve allargare
+					// la riga delle altre card: si misura solo da chiuso.
+					var skip = card.classList.contains( 'is-expanded' )
+						&& el.classList.contains( 'lu3g-carousel__clamp' );
+
+					( groups[ pair[ 0 ] ] = groups[ pair[ 0 ] ] || [] ).push( { el: el, skip: skip } );
+				} );
+			} );
+
+			Object.keys( groups ).forEach( function ( key ) {
+				var max = 0;
+
+				// offsetHeight ignora scale e transform: in modalità centrata
+				// le card laterali rimpicciolite non falsano la misura.
+				groups[ key ].forEach( function ( item ) {
+					if ( ! item.skip ) {
+						max = Math.max( max, item.el.offsetHeight );
+					}
+				} );
+
+				if ( max > 0 ) {
+					groups[ key ].forEach( function ( item ) {
+						item.el.style.minHeight = max + 'px';
+					} );
+				}
+			} );
+		}
+
+		var frame = null;
+
+		function schedule() {
+			if ( frame ) {
+				return;
+			}
+
+			frame = window.requestAnimationFrame( function () {
+				frame = null;
+				equalize();
+			} );
+		}
+
+		equalize();
+
+		window.addEventListener( 'resize', schedule );
+		window.addEventListener( 'load', schedule );
+
+		// I font web cambiano la larghezza delle parole, quindi gli a capo.
+		if ( document.fonts && document.fonts.ready ) {
+			document.fonts.ready.then( schedule );
+		}
+
+		// Icone e immagini che arrivano dopo.
+		Array.prototype.forEach.call( root.querySelectorAll( 'img' ), function ( img ) {
+			if ( ! img.complete ) {
+				img.addEventListener( 'load', schedule );
+			}
+		} );
 	}
 
 	/**

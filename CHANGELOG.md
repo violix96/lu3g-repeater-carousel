@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.17.0
+- Nuova opzione *Layout → Distribuzione del contenuto → Allineato riga per riga*: icona, etichetta, titolo e ogni blocco di testo prendono l'altezza del più alto tra le card, così titoli e testi partono tutti alla stessa quota anche se un titolo va su più righe. Il pulsante resta in fondo come in *Distribuito*. Le altezze si ricalcolano al ridimensionamento e dopo il caricamento di font e immagini.
+
 ## 1.16.0
 - Nuova opzione *Scorrimento → Blocca con poche card*. Se le card sono al massimo il numero indicato (*Blocca fino a*, impostabile per dispositivo: di default 3 su desktop, 2 su tablet, 1 su mobile), il carosello diventa una riga ferma: niente scorrimento, frecce, indicatori, scorrimento infinito, autoplay e modalità centrata.
 - *Card bloccate*: le card si dividono tutta la larghezza, oppure mantengono la loro larghezza allineate a sinistra, al centro o a destra.
