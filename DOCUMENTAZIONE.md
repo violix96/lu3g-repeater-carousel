@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.15.0
+Documentazione del plugin — versione 1.16.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -219,6 +219,9 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 
 | Controllo | Cosa fa |
 |---|---|
+| Blocca con poche card | Con poche card il carosello diventa una riga ferma: niente scorrimento, frecce, indicatori, scorrimento infinito, autoplay e modalità centrata. |
+| Blocca fino a (card) **R** | Soglia per dispositivo: con questo numero di card o meno si blocca. Default 3 / 2 / 1 (desktop / tablet / mobile); 0 = mai. |
+| Card bloccate | *Occupano tutta la larghezza* (parti uguali) oppure *Larghezza normale* a sinistra, al centro o a destra. |
 | Velocità di scorrimento | Durata dell'animazione a ogni scatto, per frecce, indicatori e autoplay. |
 | Aggancio allo scroll | Le card si allineano al bordo quando lo scorrimento si ferma. |
 | Scorrimento infinito | Dopo l'ultima card si riparte dalla prima. Servono almeno due card. |
@@ -348,6 +351,16 @@ Con `%testo_link%` nel *Testo del pulsante* del widget, per esempio `Vai a: %tes
 5. Facoltativo: *Scorrimento infinito*, così ai lati ci sono sempre card.
 
 Con 1 card visibile e anteprima al 40% la card centrale occupa il 60% della larghezza: senza scorrimento infinito, all'inizio a sinistra c'è uno spazio vuoto, che permette alla prima card di stare al centro. Funziona anche col tipo di contenuto *Immagini*.
+
+### Poche card ferme su desktop, carosello su mobile
+
+Per esempio tre card che su desktop devono stare ferme una accanto all'altra e su mobile scorrere:
+
+1. *Scorrimento → Blocca con poche card*: attivo.
+2. *Blocca fino a*: 3 su desktop, 3 su tablet se ci stanno, 1 su mobile.
+3. *Card bloccate*: **Occupano tutta la larghezza**.
+
+Su desktop le tre card riempiono la riga, senza frecce. Su mobile tornano carosello, con frecce, loop e autoplay se sono attivi. Se un giorno le card diventano quattro, anche su desktop torna lo scorrimento.
 
 ### Carosello che gira da solo
 
@@ -506,6 +519,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.16.0**
+- Blocco dello scorrimento con poche card, per dispositivo.
 
 **1.15.0**
 - Allineamento dell'icona; corretto il fondo bianco sulle icone SVG con maschere.

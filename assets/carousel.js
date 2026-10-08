@@ -39,6 +39,19 @@
 			return;
 		}
 
+		// Blocco con poche card. La copia va presa prima di qualsiasi
+		// modifica: se cambiando dispositivo lo stato si inverte, il
+		// carosello viene ricostruito da qui, con loop e modalità centrata
+		// accesi o spenti da capo invece che smontati a metà.
+		var lock = readLock( root );
+		var pristine = lock ? root.cloneNode( true ) : null;
+		var locked = lock ? isLocked( lock ) : false;
+
+		if ( locked ) {
+			root.classList.add( 'is-locked' );
+			root.classList.remove( 'lu3g-carousel--center' );
+		}
+
 		root.dataset[ INIT_FLAG ] = '1';
 
 		var arrows = Array.prototype.slice.call( root.querySelectorAll( '[data-lu3g-dir]' ) );
@@ -50,8 +63,8 @@
 			speed = 600;
 		}
 
-		var loop = root.getAttribute( 'data-lu3g-loop' ) === '1';
-		var autoplay = root.getAttribute( 'data-lu3g-autoplay' ) === '1' && ! reduced;
+		var loop = root.getAttribute( 'data-lu3g-loop' ) === '1' && ! locked;
+		var autoplay = root.getAttribute( 'data-lu3g-autoplay' ) === '1' && ! reduced && ! locked;
 		var pauseOnHover = root.getAttribute( 'data-lu3g-pause' ) === '1';
 
 		var delay = parseInt( root.getAttribute( 'data-lu3g-delay' ), 10 );
@@ -399,7 +412,8 @@
 		 * Avvia il ciclo automatico.
 		 */
 		function startAutoplay() {
-			if ( ! autoplay || timer ) {
+			// root staccato: l'istanza è stata sostituita da una ricostruzione.
+			if ( ! autoplay || timer || ! root.isConnected ) {
 				return;
 			}
 
@@ -847,7 +861,33 @@
 			scheduleCenter();
 		}, { passive: true } );
 
+		/**
+		 * Sostituisce il carosello con una copia intatta e la inizializza.
+		 */
+		function rebuild() {
+			stopAutoplay();
+			cancelAnimation();
+
+			if ( ! root.parentNode ) {
+				return;
+			}
+
+			var fresh = pristine.cloneNode( true );
+			root.parentNode.replaceChild( fresh, root );
+			initCarousel( fresh );
+		}
+
 		window.addEventListener( 'resize', function () {
+			// Dopo una ricostruzione questa istanza è staccata dalla pagina.
+			if ( ! root.isConnected ) {
+				return;
+			}
+
+			if ( lock && isLocked( lock ) !== locked ) {
+				rebuild();
+				return;
+			}
+
 			if ( loop ) {
 				setWidth = measureSet( originalCount );
 			}
@@ -859,6 +899,10 @@
 
 		// Le immagini o i font che caricano dopo possono cambiare le misure.
 		window.addEventListener( 'load', function () {
+			if ( ! root.isConnected ) {
+				return;
+			}
+
 			if ( loop ) {
 				setWidth = measureSet( originalCount );
 			}
@@ -1080,6 +1124,49 @@
 		}, { threshold: 0.25 } );
 
 		observer.observe( root );
+	}
+
+	/**
+	 * Legge le regole di blocco dello scorrimento, se presenti.
+	 *
+	 * @param {HTMLElement} root Elemento del carosello.
+	 * @return {?Object} { base, rules: [ { q, lock } ] } o null.
+	 */
+	function readLock( root ) {
+		var raw = root.getAttribute( 'data-lu3g-lock' );
+
+		if ( ! raw ) {
+			return null;
+		}
+
+		try {
+			var data = JSON.parse( raw );
+			return data && Array.isArray( data.rules ) ? data : null;
+		} catch ( e ) {
+			return null;
+		}
+	}
+
+	/**
+	 * Dice se, alla larghezza attuale, lo scorrimento è bloccato.
+	 *
+	 * Parte dal valore desktop e applica le regole in ordine: le max-width
+	 * arrivano dalla più larga alla più stretta, quindi vince quella del
+	 * dispositivo più piccolo che corrisponde.
+	 *
+	 * @param {Object} lock Regole lette da readLock().
+	 * @return {boolean}
+	 */
+	function isLocked( lock ) {
+		var value = !! lock.base;
+
+		lock.rules.forEach( function ( rule ) {
+			if ( rule && rule.q && window.matchMedia( rule.q ).matches ) {
+				value = !! rule.lock;
+			}
+		} );
+
+		return value;
 	}
 
 	/**

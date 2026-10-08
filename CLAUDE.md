@@ -7,7 +7,7 @@ Questo file serve a riprendere il lavoro in una nuova sessione. Leggilo prima di
 - Autore: Vincenzo, LU3G Agenzia Web (GitHub `violix96`). Si lavora in **italiano**, risposte brevi e pratiche.
 - Plugin WordPress: widget Elementor **"Carosello repeater"** (nome `lu3g-repeater-carousel`, categoria LU3G). Carosello a scroll orizzontale nativo con snap, alimentato da un repeater JetEngine, da card scritte a mano o da una galleria di immagini.
 - Repository: `violix96/lu3g-repeater-carousel` (pubblico, branch `main`). È la fonte di verità.
-- Versione attuale: **1.15.0**.
+- Versione attuale: **1.16.0**.
 
 ## File
 
@@ -60,6 +60,7 @@ Questo file serve a riprendere il lavoro in una nuova sessione. Leggilo prima di
 - 1.14.0: `dynamic_link_source` = `subfields` con `button_url_field` (default `link_bottone`), `button_text_field` (default `testo_bottone`), `button_fields_new_tab`; helper `lu3g_fields_button_text`; `lu3g_get_row_url` accetta una chiave opzionale. `link_field` ora visibile solo in modalità `field`.
 - 1.14.1: in modalità `field`, con `link_field` indicato e vuoto nella riga, niente pulsante (prima usciva uno span non cliccabile).
 - 1.15.0: `icon_align` (CHOOSE responsive, justify-content su `.lu3g-carousel__icon`); whitelist SVG (`lu3g_allowed_svg_tags`) con `mask` e attributo `mask`; `lu3g_prefix_svg_ids` prefissa gli id degli SVG inline (`lu3g-svg{ID}-`). Le icone delle card manuali passano da Icons_Manager di Elementor, non dalla whitelist.
+- 1.16.0: `lock_scroll`, `lock_max_cards` (responsive NUMBER, default 3/2/1), `lock_align` (fill/start/center/end). PHP `lu3g_lock_rules` calcola per ogni breakpoint attivo di Elementor (con ereditarietà) se bloccare e scrive `data-lu3g-lock` = {base, rules:[{q,lock}]}; il JS (`readLock`/`isLocked`) applica `is-locked`, toglie `--center`, spegne loop/autoplay; se lo stato cambia al resize `rebuild()` sostituisce il root con la copia intatta presa all'avvio (le vecchie istanze controllano `root.isConnected`).
 - 1.12.0/1.12.1: modalità centrata (`center_mode`, `center_side_scale`, `center_side_opacity`, `center_main_scale` default 1.04, `center_shadow`); con 3 card visibili la seconda è subito al centro senza scorrere. JS: `updateCenter`/`scheduleCenter` assegnano `.is-center`.
 
 ## Come si testa

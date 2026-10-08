@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.16.0
+- Nuova opzione *Scorrimento → Blocca con poche card*. Se le card sono al massimo il numero indicato (*Blocca fino a*, impostabile per dispositivo: di default 3 su desktop, 2 su tablet, 1 su mobile), il carosello diventa una riga ferma: niente scorrimento, frecce, indicatori, scorrimento infinito, autoplay e modalità centrata.
+- *Card bloccate*: le card si dividono tutta la larghezza, oppure mantengono la loro larghezza allineate a sinistra, al centro o a destra.
+- Se cambiando dispositivo, o ridimensionando la finestra, il blocco si attiva o si disattiva, il carosello si ricostruisce da solo.
+
 ## 1.15.0
 - Nuovo controllo *Stile → Icona → Allineamento* (sinistra, centro, destra, per dispositivo), per l'icona sopra o sotto il testo.
 - Corretto: le icone SVG lette dal repeater JetEngine (*Sottocampo icona*) che usano maschere, come quelle esportate da Figma, mostravano macchie bianche. Il filtro di sicurezza toglieva il tag `<mask>` lasciando visibili le forme che conteneva.
