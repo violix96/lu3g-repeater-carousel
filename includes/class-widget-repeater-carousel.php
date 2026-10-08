@@ -1501,8 +1501,9 @@ class Repeater_Carousel extends Widget_Base {
 				'options'     => array(
 					'grouped' => __( 'Raggruppato', 'lu3g-carousel' ),
 					'spread'  => __( 'Distribuito: contenuto in alto, pulsante in fondo', 'lu3g-carousel' ),
+					'rows'    => __( 'Allineato riga per riga', 'lu3g-carousel' ),
 				),
-				'description' => __( 'Distribuito allinea tra le card icone, titoli e pulsanti, indipendentemente dalla lunghezza dei testi.', 'lu3g-carousel' ),
+				'description' => __( 'Distribuito allinea tra le card icone, titoli e pulsanti, indipendentemente dalla lunghezza dei testi. Allineato riga per riga fa lo stesso e in più dà a ogni elemento — icona, etichetta, titolo, ogni testo — l\'altezza del più alto tra le card, così titoli e testi partono tutti alla stessa quota.', 'lu3g-carousel' ),
 				'condition'   => array( 'source_type!' => 'gallery' ),
 			)
 		);
@@ -5143,8 +5144,14 @@ class Repeater_Carousel extends Widget_Base {
 			$classes[] = 'lu3g-carousel--center';
 		}
 
-		if ( 'spread' === $settings['content_layout'] ) {
+		// "Riga per riga" è la distribuzione con in più l'allineamento degli
+		// elementi, che fa il JS misurandoli.
+		if ( in_array( $settings['content_layout'], array( 'spread', 'rows' ), true ) ) {
 			$classes[] = 'lu3g-carousel--spread';
+		}
+
+		if ( 'rows' === $settings['content_layout'] ) {
+			$classes[] = 'lu3g-carousel--rows';
 		}
 
 		if ( $indicator_type ) {

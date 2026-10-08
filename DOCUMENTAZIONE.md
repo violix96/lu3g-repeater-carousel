@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.16.0
+Documentazione del plugin — versione 1.17.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -212,7 +212,7 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Ombra della card centrale | Ombra di Elementor, attiva di default. |
 | Dimensione delle card laterali **R** | Da 0,6 a 1. |
 | Opacità delle card laterali | Da 0 a 1. |
-| Distribuzione del contenuto | *Raggruppato*: tutto il contenuto insieme, posizionato in alto, al centro o in basso. *Distribuito*: contenuto in alto e pulsante in fondo, con icone, titoli e pulsanti allineati tra le card. |
+| Distribuzione del contenuto | *Raggruppato*: tutto il contenuto insieme, posizionato in alto, al centro o in basso. *Distribuito*: contenuto in alto e pulsante in fondo, con icone, titoli e pulsanti allineati tra le card. *Allineato riga per riga*: come Distribuito, e in più ogni elemento (icona, etichetta, titolo, ogni testo) prende l'altezza del più alto tra le card, così ogni riga di contenuto parte alla stessa quota. |
 | Posizione del testo **R** | Solo in modalità raggruppata. |
 
 #### Scorrimento
@@ -283,6 +283,17 @@ Le sezioni seguono l'ordine degli elementi nella card. Dove c'è un effetto hove
 ---
 
 ## Ricette
+
+### Colonne con titoli e testi allineati riga per riga
+
+Il layout "tre passaggi": icona, titolo, testo e un secondo testo in evidenza, con ogni elemento alla stessa altezza nelle tre colonne anche quando un titolo va su due righe e gli altri su una.
+
+1. *Layout → Distribuzione del contenuto*: **Allineato riga per riga**.
+2. *Layout → Altezza fissa*: spento.
+3. *Stile → Card*: sfondo trasparente e niente bordo, se le vuoi come colonne libere; *Stile → Icona → Allineamento*: al centro; allineamento del testo al centro.
+4. Facoltativo: *Scorrimento → Blocca con poche card*, così su desktop le tre colonne restano ferme e su mobile scorrono.
+
+Gli elementi si allineano per tipo e ordine: il secondo testo di una card con il secondo testo delle altre. Conviene che le card abbiano la stessa struttura; se a una manca un elemento che le altre hanno, le righe sotto di lei slittano.
 
 ### Card con icone, titoli e pulsanti allineati
 
@@ -519,6 +530,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.17.0**
+- Distribuzione *Allineato riga per riga*.
 
 **1.16.0**
 - Blocco dello scorrimento con poche card, per dispositivo.
