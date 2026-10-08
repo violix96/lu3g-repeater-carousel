@@ -409,7 +409,7 @@ class Repeater_Carousel extends Widget_Base {
 				'label'       => __( 'Link (facoltativo)', 'lu3g-carousel' ),
 				'type'        => Controls_Manager::URL,
 				'placeholder' => 'https://',
-				'description' => __( 'Con il testo del pulsante compilato il link va sul pulsante; senza, rende cliccabile l\'intera card.', 'lu3g-carousel' ),
+				'description' => __( 'Con il testo del pulsante compilato il link va sul pulsante; senza, rende cliccabile l\'intera card (con "Solo icona" va sempre sul pulsante).', 'lu3g-carousel' ),
 				'dynamic'     => array( 'active' => true ),
 			)
 		);
@@ -899,8 +899,8 @@ class Repeater_Carousel extends Widget_Base {
 			array(
 				'label'       => __( 'Testo del pulsante (facoltativo)', 'lu3g-carousel' ),
 				'type'        => Controls_Manager::TEXT,
-				'placeholder' => __( 'Scopri', 'lu3g-carousel' ),
-				'description' => __( 'Uguale per tutte le card, oppure %nome_sottocampo% per leggerlo dal repeater. Con il pulsante, il link va sul pulsante invece che sull\'intera card.', 'lu3g-carousel' ),
+				'placeholder' => __( 'Scopri di più', 'lu3g-carousel' ),
+				'description' => __( 'Uguale per tutte le card, oppure %nome_sottocampo% per leggerlo dal repeater. Con "Dal primo link nel testo" puoi usare %testo_link% per riprendere le parole del link; se lasci vuoto il pulsante dice "Scopri di più". Con il pulsante, il link va sul pulsante invece che sull\'intera card.', 'lu3g-carousel' ),
 				'condition'   => array( 'source_type' => 'dynamic' ),
 				'label_block' => true,
 			)
@@ -1020,6 +1020,22 @@ class Repeater_Carousel extends Widget_Base {
 		);
 
 		$this->add_control(
+			'button_display',
+			array(
+				'label'       => __( 'Contenuto del pulsante', 'lu3g-carousel' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'text_icon',
+				'options'     => array(
+					'text_icon' => __( 'Testo e icona', 'lu3g-carousel' ),
+					'text'      => __( 'Solo testo', 'lu3g-carousel' ),
+					'icon'      => __( 'Solo icona', 'lu3g-carousel' ),
+				),
+				'description' => __( 'Con "Solo icona" il pulsante compare su ogni card che ha un link, anche senza testo; il testo, se c\'è, resta come etichetta per i lettori di schermo.', 'lu3g-carousel' ),
+				'separator'   => 'before',
+			)
+		);
+
+		$this->add_control(
 			'button_icon',
 			array(
 				'label'     => __( 'Icona del pulsante', 'lu3g-carousel' ),
@@ -1028,6 +1044,7 @@ class Repeater_Carousel extends Widget_Base {
 					'value'   => 'fas fa-arrow-right',
 					'library' => 'fa-solid',
 				),
+				'condition' => array( 'button_display!' => 'text' ),
 			)
 		);
 
@@ -3829,6 +3846,31 @@ class Repeater_Carousel extends Widget_Base {
 	}
 
 	/**
+	 * Modalità "Solo icona": ogni card con un link riceve il pulsante.
+	 *
+	 * Normalmente il pulsante esiste solo se ha un testo, e senza testo il
+	 * link rende cliccabile l'intera card. Con la sola icona il testo non
+	 * si vede, quindi non serve compilarlo: il link della card passa sul
+	 * pulsante. Il testo, scritto o predefinito, diventa l'aria-label.
+	 *
+	 * @param array $items Card già lette dalla sorgente.
+	 * @return array
+	 */
+	private function lu3g_icon_only_buttons( $items ) {
+		foreach ( $items as $i => $item ) {
+			if ( '' === $item['button_text'] && '' !== $item['url'] ) {
+				$items[ $i ]['button_text']    = __( 'Scopri di più', 'lu3g-carousel' );
+				$items[ $i ]['button_url']     = $item['url'];
+				$items[ $i ]['button_new_tab'] = $item['new_tab'];
+				$items[ $i ]['button_rel']     = $item['rel'];
+				$items[ $i ]['url']            = '';
+			}
+		}
+
+		return $items;
+	}
+
+	/**
 	 * Card della sorgente Immagini: una per immagine della galleria.
 	 *
 	 * Hanno le stesse chiavi delle altre sorgenti, vuote, più l'immagine: il
@@ -4072,7 +4114,7 @@ class Repeater_Carousel extends Widget_Base {
 			$description = $first ? $first['html'] : '';
 			$desc_style  = $first ? $first['style'] : '1';
 
-			$button_text = $this->lu3g_dynamic_button_text( $row, $settings );
+			$button_text = $this->lu3g_dynamic_button_text( $row, $settings, $text_link ? $text_link['text'] : '' );
 			$url         = $this->lu3g_get_row_url( $row, $settings );
 			$row_new_tab = $new_tab;
 
@@ -4126,7 +4168,7 @@ class Repeater_Carousel extends Widget_Base {
 	 *
 	 * @param array $row      Riga del repeater.
 	 * @param array $settings Impostazioni del widget.
-	 * @return array|null Chiavi url, new_tab e row (la riga ripulita), o null.
+	 * @return array|null Chiavi url, new_tab, text (parole del link) e row (la riga ripulita), o null.
 	 */
 	private function lu3g_extract_text_link( $row, $settings ) {
 		$keys = array();
@@ -4175,6 +4217,7 @@ class Repeater_Carousel extends Widget_Base {
 			return array(
 				'url'     => $url,
 				'new_tab' => (bool) preg_match( '/\btarget\s*=\s*(["\'])_blank\1/i', $match[1] ),
+				'text'    => trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( $match[2] ) ) ),
 				'row'     => $row,
 			);
 		}
@@ -4333,11 +4376,12 @@ class Repeater_Carousel extends Widget_Base {
 	 * col valore della riga. Se dopo la sostituzione resta vuoto, la card
 	 * non ha pulsante.
 	 *
-	 * @param array $row      Riga del repeater.
-	 * @param array $settings Impostazioni del widget.
+	 * @param array  $row       Riga del repeater.
+	 * @param array  $settings  Impostazioni del widget.
+	 * @param string $link_text Parole del link trovato nel testo, per %testo_link%.
 	 * @return string Testo semplice, non ancora escapato.
 	 */
-	private function lu3g_dynamic_button_text( $row, $settings ) {
+	private function lu3g_dynamic_button_text( $row, $settings, $link_text = '' ) {
 		$template = isset( $settings['dynamic_button_text'] ) ? trim( (string) $settings['dynamic_button_text'] ) : '';
 
 		if ( '' === $template ) {
@@ -4346,8 +4390,16 @@ class Repeater_Carousel extends Widget_Base {
 
 		$text = preg_replace_callback(
 			'/%([a-zA-Z0-9_\-]+)%/',
-			function ( $matches ) use ( $row ) {
+			function ( $matches ) use ( $row, $link_text ) {
 				$key = $matches[1];
+
+				// Segnaposto riservato: le parole del link trovato nel testo,
+				// a meno che il repeater non abbia davvero un campo con
+				// questo nome.
+				if ( 'testo_link' === $key && ! isset( $row[ $key ] ) ) {
+					return $link_text;
+				}
+
 				return ( isset( $row[ $key ] ) && is_scalar( $row[ $key ] ) ) ? (string) $row[ $key ] : '';
 			},
 			$template
@@ -4648,6 +4700,7 @@ class Repeater_Carousel extends Widget_Base {
 				'title_tag'          => 'span',
 				'truncate_target'    => 'title',
 				'button_icon'        => array(),
+				'button_display'     => 'text_icon',
 				'icon_field'         => '',
 				'truncate'           => '',
 				'expand_label'       => __( 'Mostra di più', 'lu3g-carousel' ),
@@ -4668,6 +4721,22 @@ class Repeater_Carousel extends Widget_Base {
 			: 600;
 
 		$items = $this->lu3g_get_cards( $settings );
+
+		// Cosa mostra il pulsante. "Solo icona" senza un'icona scelta
+		// lascerebbe pulsanti vuoti: in quel caso resta il testo.
+		$button_display = in_array( $settings['button_display'], array( 'text_icon', 'text', 'icon' ), true )
+			? $settings['button_display']
+			: 'text_icon';
+
+		$button_icon = ( 'text' !== $button_display && ! empty( $settings['button_icon'] ) )
+			? $this->lu3g_elementor_icon_markup( $settings['button_icon'] )
+			: '';
+
+		$icon_only = ( 'icon' === $button_display && '' !== $button_icon );
+
+		if ( $icon_only && 'gallery' !== $settings['source_type'] ) {
+			$items = $this->lu3g_icon_only_buttons( $items );
+		}
 
 		if ( empty( $items ) ) {
 			if ( \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
@@ -4801,10 +4870,6 @@ class Repeater_Carousel extends Widget_Base {
 				esc_html( $settings['expand_label'] )
 			);
 		}
-
-		$button_icon = ! empty( $settings['button_icon'] )
-			? $this->lu3g_elementor_icon_markup( $settings['button_icon'] )
-			: '';
 
 		if ( $truncate ) {
 			$classes[] = 'lu3g-carousel--clamp';
@@ -4976,7 +5041,9 @@ class Repeater_Carousel extends Widget_Base {
 										<div class="lu3g-carousel__actions">
 											<?php
 											$button_tag   = $item['button_url'] ? 'a' : 'span';
-											$button_attrs = 'class="lu3g-carousel__button"';
+											$button_attrs = $icon_only
+												? 'class="lu3g-carousel__button lu3g-carousel__button--icon-only" aria-label="' . esc_attr( $item['button_text'] ) . '"'
+												: 'class="lu3g-carousel__button"';
 
 											if ( $item['button_url'] ) {
 												$button_attrs .= ' href="' . esc_url( $item['button_url'] ) . '"';
@@ -4989,7 +5056,9 @@ class Repeater_Carousel extends Widget_Base {
 											}
 											?>
 											<<?php echo esc_html( $button_tag ) . ' ' . $button_attrs; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
-												<span class="lu3g-carousel__button-text"><?php echo esc_html( $item['button_text'] ); ?></span>
+												<?php if ( ! $icon_only ) : ?>
+													<span class="lu3g-carousel__button-text"><?php echo esc_html( $item['button_text'] ); ?></span>
+												<?php endif; ?>
 												<?php if ( '' !== $button_icon ) : ?>
 													<span class="lu3g-carousel__button-icon" aria-hidden="true"><?php echo $button_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
 												<?php endif; ?>

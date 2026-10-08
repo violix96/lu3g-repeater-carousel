@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.13.0
+- Nuova opzione *Opzioni del contenuto → Contenuto del pulsante*: *Testo e icona*, *Solo testo* o *Solo icona*. Con *Solo icona* il pulsante compare su ogni card che ha un link, senza bisogno di scrivere un testo; il testo, se c'è, diventa l'etichetta per i lettori di schermo.
+- Sorgente dinamica con *Dal primo link nel testo*: nel testo del pulsante si può usare `%testo_link%` per riprendere le parole del link trovato.
+
 ## 1.12.1
 - Modalità centrata: all'avvio è centrata la card di mezzo del gruppo visibile. Con 3 card visibili si vede subito piccola, grande, piccola, senza spazi vuoti.
 - La card centrale è in rilievo: ombra regolabile (attiva di default) e dimensione che può superare 1.

@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.12.1
+Documentazione del plugin — versione 1.13.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -163,7 +163,7 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Sottocampo da mostrare | *(dinamico)* Il sottocampo del titolo. |
 | Sottocampo etichetta | *(dinamico)* Testo breve sopra il titolo. |
 | Blocchi di testo | *(dinamico)* Sottocampi da mostrare sotto il titolo, ognuno con uno stile. |
-| Testo del pulsante | *(dinamico)* Testo fisso o `%sottocampo%`. |
+| Testo del pulsante | *(dinamico)* Testo fisso o `%sottocampo%`. Con *Dal primo link nel testo* anche `%testo_link%`, le parole del link trovato; vuoto = "Scopri di più". |
 | Sottocampo icona | *(dinamico)* Sottocampo media. Gli SVG diventano ricolorabili. |
 | Link della card | *(dinamico)* *Da un sottocampo link*, oppure *Dal primo link nel testo*: cerca un `<a href>` nel titolo e nei blocchi di testo, lo sposta sul pulsante e lo toglie dal testo. Il pulsante compare solo sulle card che hanno un link. |
 | Sottocampo link | *(dinamico)* Va sul pulsante; senza pulsante rende cliccabile la card. |
@@ -185,7 +185,8 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Controllo | Cosa fa |
 |---|---|
 | Tag del titolo | H2–H6, p, span, div. Cambia solo la semantica, non l'aspetto: per card con descrizione usa H3. |
-| Icona del pulsante | Icona o SVG accanto al testo del pulsante. |
+| Contenuto del pulsante | *Testo e icona*, *Solo testo* o *Solo icona*. Con *Solo icona* il pulsante compare su ogni card con un link, anche senza testo; il testo resta come etichetta per i lettori di schermo. Per un pulsante tondo: padding uguale sui quattro lati e raggio 50%. |
+| Icona del pulsante | Icona o SVG accanto al testo del pulsante. Nascosta con *Solo testo*. |
 | Solo testo | Toglie i tag HTML dal titolo e dai campi JetEngine. I blocchi di testo delle card statiche mantengono sempre la formattazione dell'editor. |
 | Tronca il testo | Limita il testo a un numero di righe e aggiunge *Mostra di più*. |
 | Cosa troncare | Il titolo o il primo blocco di testo. |
@@ -314,7 +315,7 @@ Risultato: `← ━━━━──── →`. Con **Tipo** *Puntini* si ottiene
 Quando i link sono scritti dentro i testi del repeater, per esempio un titolo che contiene `<a href="…">`:
 
 1. *Card → Link della card*: **Dal primo link nel testo**.
-2. *Testo del pulsante*: per esempio `Scopri di più`. Se lo lasci vuoto viene usato "Scopri di più".
+2. *Testo del pulsante*: per esempio `Leggi`, oppure `%testo_link%` per usare le parole del link stesso. Se lo lasci vuoto viene usato "Scopri di più". Se vuoi solo la freccia: *Opzioni del contenuto → Contenuto del pulsante → Solo icona*.
 
 Su ogni card il plugin cerca il primo link nel titolo e poi nei blocchi di testo. Se lo trova, il pulsante compare con quel link, e si apre in una nuova scheda se il link aveva `target="_blank"`. Nel testo il link viene tolto e resta solo il suo contenuto, così il titolo non diventa cliccabile due volte. Sulle card senza link il pulsante non compare.
 
@@ -346,7 +347,7 @@ Il pulsante *Mostra di più* compare solo sulle card dove il testo viene davvero
 
 ## Comportamenti da conoscere
 
-**Il link segue il pulsante.** Se una card ha il testo del pulsante, il link va sul pulsante e la card non è cliccabile. Se non ce l'ha, il link rende cliccabile l'intera card. Le due cose si escludono perché un link dentro un altro link non è HTML valido. Vale per entrambe le sorgenti.
+**Il link segue il pulsante.** Se una card ha il testo del pulsante, il link va sul pulsante e la card non è cliccabile. Se non ce l'ha, il link rende cliccabile l'intera card; con *Solo icona* invece il link va sempre sul pulsante. Le due cose si escludono perché un link dentro un altro link non è HTML valido. Vale per entrambe le sorgenti.
 
 **Troncamento e card cliccabili.** Se l'intera card è un link, il troncamento si disattiva, perché il pulsante *Mostra di più* dentro un link non funzionerebbe. Con il link sul pulsante invece il troncamento funziona.
 
@@ -381,6 +382,7 @@ Quasi tutto si regola dal pannello. Per casi particolari, queste sono le classi 
 | `.lu3g-carousel__text` | Titolo |
 | `.lu3g-carousel__block--style-1` / `-2` / `-3` | Blocchi di testo per stile |
 | `.lu3g-carousel__button` | Pulsante della card |
+| `.lu3g-carousel__button--icon-only` | Pulsante in modalità *Solo icona* |
 | `.lu3g-carousel__toggle` | Mostra di più |
 | `.lu3g-carousel__nav` / `.lu3g-carousel__arrow` | Contenitore delle frecce / freccia |
 | `.lu3g-carousel__indicators` / `.lu3g-carousel__dot` | Indicatori / singolo puntino |
@@ -484,6 +486,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.13.0**
+- Pulsante con solo testo, solo icona o entrambi; `%testo_link%` per il testo del pulsante.
 
 **1.12.1**
 - Modalità centrata: all'avvio è centrata la card di mezzo del gruppo visibile; card centrale in rilievo con ombra e dimensione regolabili.

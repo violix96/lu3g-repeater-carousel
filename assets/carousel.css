@@ -1020,6 +1020,13 @@ span.lu3g-carousel__button {
 	fill: currentColor;
 }
 
+/* Solo icona: niente spazio per il testo, icona al centro. Con padding
+   uguale sui quattro lati e raggio 50% diventa un cerchio. */
+.lu3g-carousel .lu3g-carousel__button--icon-only {
+	gap: 0;
+	justify-content: center;
+}
+
 /* La freccia avanza in hover sulla card intera, non solo sul pulsante. */
 .lu3g-carousel__card:hover .lu3g-carousel__button-icon {
 	transform: translateX(var(--lu3g-button-icon-shift));
