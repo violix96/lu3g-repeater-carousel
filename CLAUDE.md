@@ -7,7 +7,7 @@ Questo file serve a riprendere il lavoro in una nuova sessione. Leggilo prima di
 - Autore: Vincenzo, LU3G Agenzia Web (GitHub `violix96`). Si lavora in **italiano**, risposte brevi e pratiche.
 - Plugin WordPress: widget Elementor **"Carosello repeater"** (nome `lu3g-repeater-carousel`, categoria LU3G). Carosello a scroll orizzontale nativo con snap, alimentato da un repeater JetEngine, da card scritte a mano o da una galleria di immagini.
 - Repository: `violix96/lu3g-repeater-carousel` (pubblico, branch `main`). È la fonte di verità.
-- Versione attuale: **1.13.0**.
+- Versione attuale: **1.14.0**.
 
 ## File
 
@@ -57,6 +57,7 @@ Questo file serve a riprendere il lavoro in una nuova sessione. Leggilo prima di
 - 1.10.0: `dynamic_link_source` "Dal primo link nel testo" (il pulsante appare solo se nel testo c'è un `<a>`).
 - 1.11.0: `hide_idle_arrows`, nasconde le frecce se non c'è nulla da scorrere (JS aggiunge `is-static`).
 - 1.13.0: `button_display` (testo e icona / solo testo / solo icona; con solo icona ogni card con link riceve il pulsante, testo → aria-label, helper `lu3g_icon_only_buttons`); `%testo_link%` nel testo del pulsante dinamico.
+- 1.14.0: `dynamic_link_source` = `subfields` con `button_url_field` (default `link_bottone`), `button_text_field` (default `testo_bottone`), `button_fields_new_tab`; helper `lu3g_fields_button_text`; `lu3g_get_row_url` accetta una chiave opzionale. `link_field` ora visibile solo in modalità `field`.
 - 1.12.0/1.12.1: modalità centrata (`center_mode`, `center_side_scale`, `center_side_opacity`, `center_main_scale` default 1.04, `center_shadow`); con 3 card visibili la seconda è subito al centro senza scorrere. JS: `updateCenter`/`scheduleCenter` assegnano `.is-center`.
 
 ## Come si testa

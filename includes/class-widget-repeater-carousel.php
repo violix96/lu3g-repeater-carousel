@@ -900,7 +900,7 @@ class Repeater_Carousel extends Widget_Base {
 				'label'       => __( 'Testo del pulsante (facoltativo)', 'lu3g-carousel' ),
 				'type'        => Controls_Manager::TEXT,
 				'placeholder' => __( 'Scopri di più', 'lu3g-carousel' ),
-				'description' => __( 'Uguale per tutte le card, oppure %nome_sottocampo% per leggerlo dal repeater. Con "Dal primo link nel testo" puoi usare %testo_link% per riprendere le parole del link; se lasci vuoto il pulsante dice "Scopri di più". Con il pulsante, il link va sul pulsante invece che sull\'intera card.', 'lu3g-carousel' ),
+				'description' => __( 'Uguale per tutte le card, oppure %nome_sottocampo% per leggerlo dal repeater. Con "Dal primo link nel testo" puoi usare %testo_link% per riprendere le parole del link, con "Da sottocampi del repeater" per il valore del sottocampo testo pulsante; se lasci vuoto il pulsante dice "Scopri di più". Con il pulsante, il link va sul pulsante invece che sull\'intera card.', 'lu3g-carousel' ),
 				'condition'   => array( 'source_type' => 'dynamic' ),
 				'label_block' => true,
 			)
@@ -924,10 +924,11 @@ class Repeater_Carousel extends Widget_Base {
 				'type'        => Controls_Manager::SELECT,
 				'default'     => 'field',
 				'options'     => array(
-					'field' => __( 'Da un sottocampo link', 'lu3g-carousel' ),
-					'text'  => __( 'Dal primo link nel testo', 'lu3g-carousel' ),
+					'field'     => __( 'Da un sottocampo link', 'lu3g-carousel' ),
+					'text'      => __( 'Dal primo link nel testo', 'lu3g-carousel' ),
+					'subfields' => __( 'Da sottocampi del repeater', 'lu3g-carousel' ),
 				),
-				'description' => __( '"Dal primo link nel testo" cerca un link nel titolo e nei blocchi di testo di ogni riga e lo sposta sul pulsante: il pulsante compare solo sulle card che hanno un link.', 'lu3g-carousel' ),
+				'description' => __( '"Dal primo link nel testo" cerca un link nel titolo e nei blocchi di testo di ogni riga e lo sposta sul pulsante. "Da sottocampi del repeater" legge link e testo del pulsante da due sottocampi dedicati e lascia il testo della card com\'è. In entrambi i casi il pulsante compare solo sulle card che hanno un link.', 'lu3g-carousel' ),
 				'condition'   => array( 'source_type' => 'dynamic' ),
 			)
 		);
@@ -939,8 +940,8 @@ class Repeater_Carousel extends Widget_Base {
 				'type'        => Controls_Manager::TEXT,
 				'description' => __( 'Se valorizzato, il link va sul pulsante; senza pulsante rende cliccabile l\'intera card.', 'lu3g-carousel' ),
 				'condition'   => array(
-					'source_type'          => 'dynamic',
-					'dynamic_link_source!' => 'text',
+					'source_type'         => 'dynamic',
+					'dynamic_link_source' => 'field',
 				),
 				'label_block' => true,
 			)
@@ -952,7 +953,59 @@ class Repeater_Carousel extends Widget_Base {
 				'label'     => __( 'Apri in una nuova scheda', 'lu3g-carousel' ),
 				'type'      => Controls_Manager::SWITCHER,
 				'default'   => '',
-				'condition' => array( 'link_field!' => '' ),
+				'condition' => array(
+					'link_field!'          => '',
+					'dynamic_link_source!' => 'subfields',
+				),
+			)
+		);
+
+		// Modalità "Da sottocampi del repeater". Campi di testo libero come
+		// gli altri nomi di sottocampo del widget: Elementor costruisce i
+		// controlli una volta sola, prima di sapere quale repeater è scelto,
+		// quindi non può proporre l'elenco dei suoi sottocampi.
+		$this->add_control(
+			'button_url_field',
+			array(
+				'label'       => __( 'Sottocampo URL', 'lu3g-carousel' ),
+				'type'        => Controls_Manager::TEXT,
+				'default'     => 'link_bottone',
+				'placeholder' => 'link_bottone',
+				'description' => __( 'Il sottocampo con il link del pulsante. Se in una riga è vuoto, quella card non ha il pulsante.', 'lu3g-carousel' ),
+				'condition'   => array(
+					'source_type'         => 'dynamic',
+					'dynamic_link_source' => 'subfields',
+				),
+				'label_block' => true,
+			)
+		);
+
+		$this->add_control(
+			'button_text_field',
+			array(
+				'label'       => __( 'Sottocampo testo pulsante', 'lu3g-carousel' ),
+				'type'        => Controls_Manager::TEXT,
+				'default'     => 'testo_bottone',
+				'placeholder' => 'testo_bottone',
+				'description' => __( 'Il sottocampo con il testo del pulsante. Se è vuoto si usa il "Testo del pulsante" qui sopra, e se manca anche quello "Scopri di più".', 'lu3g-carousel' ),
+				'condition'   => array(
+					'source_type'         => 'dynamic',
+					'dynamic_link_source' => 'subfields',
+				),
+				'label_block' => true,
+			)
+		);
+
+		$this->add_control(
+			'button_fields_new_tab',
+			array(
+				'label'     => __( 'Apri in una nuova scheda', 'lu3g-carousel' ),
+				'type'      => Controls_Manager::SWITCHER,
+				'default'   => '',
+				'condition' => array(
+					'source_type'         => 'dynamic',
+					'dynamic_link_source' => 'subfields',
+				),
 			)
 		);
 
@@ -4076,7 +4129,8 @@ class Repeater_Carousel extends Widget_Base {
 		$items   = array();
 		$new_tab = ( 'yes' === $settings['link_target'] );
 
-		$from_text = ( 'text' === $settings['dynamic_link_source'] );
+		$from_text   = ( 'text' === $settings['dynamic_link_source'] );
+		$from_fields = ( 'subfields' === $settings['dynamic_link_source'] );
 
 		foreach ( $rows as $row ) {
 			if ( ! is_array( $row ) ) {
@@ -4130,6 +4184,12 @@ class Repeater_Carousel extends Widget_Base {
 				}
 
 				$row_new_tab = $new_tab || ( $text_link && $text_link['new_tab'] );
+			} elseif ( $from_fields ) {
+				// Link e testo da due sottocampi dedicati. Il testo della card
+				// non viene toccato: nessuna ricerca di <a> nei contenuti.
+				$url         = $this->lu3g_get_row_url( $row, $settings, $settings['button_url_field'] );
+				$button_text = ( '' !== $url ) ? $this->lu3g_fields_button_text( $row, $settings ) : '';
+				$row_new_tab = ( 'yes' === $settings['button_fields_new_tab'] );
 			}
 
 			$has_button = ( '' !== $button_text );
@@ -4409,6 +4469,38 @@ class Repeater_Carousel extends Widget_Base {
 	}
 
 	/**
+	 * Testo del pulsante nella modalità "Da sottocampi del repeater".
+	 *
+	 * - Sottocampo compilato: si usa il suo valore, oppure il "Testo del
+	 *   pulsante" del widget se contiene %testo_link%, che lo riprende.
+	 * - Sottocampo vuoto: il "Testo del pulsante" del widget, purché non
+	 *   dipenda da %testo_link% (resterebbe monco); altrimenti "Scopri di più".
+	 *
+	 * Va chiamata solo per le righe che hanno un URL.
+	 *
+	 * @param array $row      Riga del repeater.
+	 * @param array $settings Impostazioni del widget.
+	 * @return string Testo semplice, non ancora escapato.
+	 */
+	private function lu3g_fields_button_text( $row, $settings ) {
+		$key   = isset( $settings['button_text_field'] ) ? trim( (string) $settings['button_text_field'] ) : '';
+		$value = ( '' !== $key && isset( $row[ $key ] ) && is_scalar( $row[ $key ] ) )
+			? trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( (string) $row[ $key ] ) ) )
+			: '';
+
+		$template        = isset( $settings['dynamic_button_text'] ) ? (string) $settings['dynamic_button_text'] : '';
+		$uses_link_token = ( false !== strpos( $template, '%testo_link%' ) );
+
+		if ( '' !== $value ) {
+			$text = $uses_link_token ? $this->lu3g_dynamic_button_text( $row, $settings, $value ) : $value;
+		} else {
+			$text = $uses_link_token ? '' : $this->lu3g_dynamic_button_text( $row, $settings );
+		}
+
+		return ( '' !== $text ) ? $text : __( 'Scopri di più', 'lu3g-carousel' );
+	}
+
+	/**
 	 * Legge lo stile scelto per un blocco, accettando solo i tre previsti.
 	 *
 	 * Il valore finisce in un nome di classe: un elenco chiuso evita che un
@@ -4552,13 +4644,18 @@ class Repeater_Carousel extends Widget_Base {
 	/**
 	 * Estrae l'URL di una riga, se configurato.
 	 *
-	 * @param array $row      Riga del repeater.
-	 * @param array $settings Impostazioni del widget.
+	 * @param array       $row      Riga del repeater.
+	 * @param array       $settings Impostazioni del widget.
+	 * @param string|null $key      Sottocampo da leggere; null = "Sottocampo link".
 	 * @return string
 	 */
-	private function lu3g_get_row_url( $row, $settings ) {
+	private function lu3g_get_row_url( $row, $settings, $key = null ) {
 
-		$key = isset( $settings['link_field'] ) ? trim( $settings['link_field'] ) : '';
+		if ( null === $key ) {
+			$key = isset( $settings['link_field'] ) ? $settings['link_field'] : '';
+		}
+
+		$key = trim( (string) $key );
 
 		if ( '' === $key || ! isset( $row[ $key ] ) ) {
 			return '';
@@ -4697,6 +4794,9 @@ class Repeater_Carousel extends Widget_Base {
 				'dynamic_blocks'     => array(),
 				'dynamic_button_text' => '',
 				'dynamic_link_source' => 'field',
+				'button_url_field'   => 'link_bottone',
+				'button_text_field'  => 'testo_bottone',
+				'button_fields_new_tab' => '',
 				'title_tag'          => 'span',
 				'truncate_target'    => 'title',
 				'button_icon'        => array(),

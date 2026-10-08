@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.14.0
+- Nuova opzione *Link della card → Da sottocampi del repeater* per la sorgente dinamica: link e testo del pulsante si leggono da due sottocampi dedicati (*Sottocampo URL*, di default `link_bottone`, e *Sottocampo testo pulsante*, di default `testo_bottone`), con il suo interruttore *Apri in una nuova scheda*. Il testo della card non viene modificato.
+- Le card senza URL non hanno il pulsante. Con l'URL e senza testo si usa il *Testo del pulsante* del widget, altrimenti "Scopri di più". `%testo_link%` nel *Testo del pulsante* riprende il valore del sottocampo testo.
+- Le modalità esistenti (*Da un sottocampo link*, *Dal primo link nel testo*) funzionano come prima.
+
 ## 1.13.0
 - Nuova opzione *Opzioni del contenuto → Contenuto del pulsante*: *Testo e icona*, *Solo testo* o *Solo icona*. Con *Solo icona* il pulsante compare su ogni card che ha un link, senza bisogno di scrivere un testo; il testo, se c'è, diventa l'etichetta per i lettori di schermo.
 - Sorgente dinamica con *Dal primo link nel testo*: nel testo del pulsante si può usare `%testo_link%` per riprendere le parole del link trovato.
