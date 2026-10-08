@@ -4190,6 +4190,12 @@ class Repeater_Carousel extends Widget_Base {
 				$url         = $this->lu3g_get_row_url( $row, $settings, $settings['button_url_field'] );
 				$button_text = ( '' !== $url ) ? $this->lu3g_fields_button_text( $row, $settings ) : '';
 				$row_new_tab = ( 'yes' === $settings['button_fields_new_tab'] );
+			} elseif ( '' !== trim( (string) $settings['link_field'] ) && '' === $url ) {
+				// "Da un sottocampo link": se il sottocampo è indicato ma in
+				// questa riga è vuoto, niente pulsante. Prima compariva lo
+				// stesso, non cliccabile. Senza sottocampo link il pulsante
+				// resta com'era, come semplice etichetta.
+				$button_text = '';
 			}
 
 			$has_button = ( '' !== $button_text );
