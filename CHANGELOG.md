@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.15.0
+- Nuovo controllo *Stile → Icona → Allineamento* (sinistra, centro, destra, per dispositivo), per l'icona sopra o sotto il testo.
+- Corretto: le icone SVG lette dal repeater JetEngine (*Sottocampo icona*) che usano maschere, come quelle esportate da Figma, mostravano macchie bianche. Il filtro di sicurezza toglieva il tag `<mask>` lasciando visibili le forme che conteneva.
+- Gli id interni degli SVG inseriti nella pagina ora hanno un prefisso unico, così due icone diverse con gli stessi id non si scambiano maschere o gradienti.
+
 ## 1.14.1
 - Corretto: con *Link della card → Da un sottocampo link* il pulsante compariva su tutte le card, anche su quelle con il sottocampo link vuoto, come pulsante non cliccabile. Ora compare solo se la riga ha il link. Se il *Sottocampo link* non è indicato, il pulsante resta come prima.
 

@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.14.1
+Documentazione del plugin — versione 1.15.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -164,7 +164,7 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Sottocampo etichetta | *(dinamico)* Testo breve sopra il titolo. |
 | Blocchi di testo | *(dinamico)* Sottocampi da mostrare sotto il titolo, ognuno con uno stile. |
 | Testo del pulsante | *(dinamico)* Testo fisso o `%sottocampo%`. Con *Dal primo link nel testo* anche `%testo_link%`, le parole del link trovato; vuoto = "Scopri di più". |
-| Sottocampo icona | *(dinamico)* Sottocampo media. Gli SVG diventano ricolorabili. |
+| Sottocampo icona | *(dinamico)* Sottocampo media. Gli SVG vengono inseriti nel markup e diventano ricolorabili; maschere, clip e gradienti sono mantenuti. |
 | Link della card | *(dinamico)* *Da un sottocampo link*; *Dal primo link nel testo*: cerca un `<a href>` nel titolo e nei blocchi di testo, lo sposta sul pulsante e lo toglie dal testo; *Da sottocampi del repeater*: link e testo del pulsante da due sottocampi dedicati, senza toccare il testo. Nelle ultime due il pulsante compare solo sulle card che hanno un link. |
 | Sottocampo URL / Sottocampo testo pulsante | *(dinamico, Da sottocampi del repeater)* Nomi dei due sottocampi, di default `link_bottone` e `testo_bottone`. |
 | Apri in una nuova scheda | *(dinamico, Da sottocampi del repeater)* Per i pulsanti di questa modalità. |
@@ -261,7 +261,7 @@ Le sezioni seguono l'ordine degli elementi nella card. Dove c'è un effetto hove
 |---|---|
 | Card | Sfondo e bordo (normale / hover), raggio dei bordi, padding. Con le immagini il padding non crea cornici: la foto copre l'intera card. |
 | Immagini | *(immagini)* Adattamento (riempi ritagliando, o intera), punto di ritaglio **R**, zoom in hover, velatura in hover. |
-| Icona | Posizione rispetto al testo (sopra, sotto, sinistra, destra) **R**, dimensione, distanza dal testo, colore (normale / hover). |
+| Icona | Posizione rispetto al testo (sopra, sotto, sinistra, destra) **R**, allineamento a sinistra, al centro o a destra (con l'icona sopra o sotto) **R**, dimensione, distanza dal testo, colore (normale / hover). |
 | Etichetta | Tipografia, distanza dal titolo, colore (normale / hover). |
 | Titolo | Tipografia, allineamento, righe riservate, colore (normale / hover). |
 | Stile testo 1, 2, 3 | Tipografia, distanza dal blocco sopra, colore (normale / hover). |
@@ -506,6 +506,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.15.0**
+- Allineamento dell'icona; corretto il fondo bianco sulle icone SVG con maschere.
 
 **1.14.1**
 - Il pulsante compare solo sulle righe che hanno il sottocampo link compilato.

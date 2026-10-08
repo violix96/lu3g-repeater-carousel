@@ -2508,6 +2508,37 @@ class Repeater_Carousel extends Widget_Base {
 		);
 
 		$this->add_responsive_control(
+			'icon_align',
+			array(
+				'label'                => __( 'Allineamento', 'lu3g-carousel' ),
+				'type'                 => Controls_Manager::CHOOSE,
+				'options'              => array(
+					'left'   => array(
+						'title' => __( 'Sinistra', 'lu3g-carousel' ),
+						'icon'  => 'eicon-text-align-left',
+					),
+					'center' => array(
+						'title' => __( 'Centro', 'lu3g-carousel' ),
+						'icon'  => 'eicon-text-align-center',
+					),
+					'right'  => array(
+						'title' => __( 'Destra', 'lu3g-carousel' ),
+						'icon'  => 'eicon-text-align-right',
+					),
+				),
+				'selectors_dictionary' => array(
+					'left'   => 'flex-start',
+					'center' => 'center',
+					'right'  => 'flex-end',
+				),
+				'selectors'            => array(
+					'{{WRAPPER}} .lu3g-carousel__icon' => 'justify-content: {{VALUE}};',
+				),
+				'description'          => __( 'Con l\'icona sopra o sotto il testo.', 'lu3g-carousel' ),
+			)
+		);
+
+		$this->add_responsive_control(
 			'icon_size',
 			array(
 				'label'      => __( 'Dimensione', 'lu3g-carousel' ),
@@ -3756,6 +3787,7 @@ class Repeater_Carousel extends Widget_Base {
 			'transform'         => true,
 			'clip-path'         => true,
 			'clip-rule'         => true,
+			'mask'              => true,
 			'style'             => true,
 		);
 
@@ -3782,12 +3814,54 @@ class Repeater_Carousel extends Widget_Base {
 			'polyline'       => array_merge( $attrs, array( 'points' => true ) ),
 			'polygon'        => array_merge( $attrs, array( 'points' => true ) ),
 			'defs'           => array(),
-			'clippath'       => array( 'id' => true ),
+			'clippath'       => array( 'id' => true, 'clippathunits' => true, 'transform' => true ),
+			// Le maschere vanno tenute: senza il tag le forme che contengono,
+			// di solito rettangoli bianchi, finirebbero visibili sull'icona.
+			'mask'           => array(
+				'id'               => true,
+				'x'                => true,
+				'y'                => true,
+				'width'            => true,
+				'height'           => true,
+				'maskunits'        => true,
+				'maskcontentunits' => true,
+				'style'            => true,
+			),
 			'title'          => array(),
 			'lineargradient' => array( 'id' => true, 'x1' => true, 'y1' => true, 'x2' => true, 'y2' => true, 'gradientunits' => true ),
 			'radialgradient' => array( 'id' => true, 'cx' => true, 'cy' => true, 'r' => true, 'gradientunits' => true ),
 			'stop'           => array( 'offset' => true, 'stop-color' => true, 'stop-opacity' => true ),
 		);
+	}
+
+	/**
+	 * Rende unici gli id interni di un SVG inserito nella pagina.
+	 *
+	 * Maschere, clip e gradienti si richiamano per id. Gli editor vettoriali
+	 * esportano id generici (mask0_1_2, clip0...) che si ripetono tra file
+	 * diversi: due icone nella stessa pagina si "ruberebbero" la maschera.
+	 * Il prefisso dipende dall'allegato, quindi la stessa icona ripetuta in
+	 * più card resta identica.
+	 *
+	 * @param string $svg    Markup dell'SVG.
+	 * @param string $prefix Prefisso da anteporre agli id.
+	 * @return string
+	 */
+	private function lu3g_prefix_svg_ids( $svg, $prefix ) {
+		if ( ! preg_match_all( '/\bid\s*=\s*(["\'])([^"\']+)\1/i', $svg, $m ) ) {
+			return $svg;
+		}
+
+		foreach ( array_unique( $m[2] ) as $old ) {
+			$q   = preg_quote( $old, '/' );
+			$new = $prefix . $old;
+
+			$svg = preg_replace( '/\bid\s*=\s*(["\'])' . $q . '\1/', 'id=$1' . $new . '$1', $svg );
+			$svg = preg_replace( '/url\(\s*([\'"]?)#' . $q . '\1\s*\)/', 'url(#' . $new . ')', $svg );
+			$svg = preg_replace( '/(href\s*=\s*["\'])#' . $q . '(["\'])/', '${1}#' . $new . '$2', $svg );
+		}
+
+		return $svg;
 	}
 
 	/**
@@ -3844,6 +3918,8 @@ class Repeater_Carousel extends Widget_Base {
 					$svg = preg_replace( '/<\?xml.*?\?>/is', '', $svg );
 					$svg = preg_replace( '/<!--.*?-->/s', '', $svg );
 					$svg = preg_replace( '/<!DOCTYPE.*?>/is', '', $svg );
+
+					$svg = $this->lu3g_prefix_svg_ids( $svg, 'lu3g-svg' . $id . '-' );
 
 					return wp_kses( trim( $svg ), $this->lu3g_allowed_svg_tags() );
 				}
