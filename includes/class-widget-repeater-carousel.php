@@ -1552,6 +1552,50 @@ class Repeater_Carousel extends Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'lock_scroll',
+			array(
+				'label'        => __( 'Blocca con poche card', 'lu3g-carousel' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => '',
+				'return_value' => 'yes',
+				'description'  => __( 'Se le card sono poche il carosello diventa una riga ferma: niente scorrimento, frecce, indicatori, scorrimento infinito e autoplay.', 'lu3g-carousel' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'lock_max_cards',
+			array(
+				'label'          => __( 'Blocca fino a (card)', 'lu3g-carousel' ),
+				'type'           => Controls_Manager::NUMBER,
+				'min'            => 0,
+				'max'            => 12,
+				'step'           => 1,
+				'default'        => 3,
+				'tablet_default' => 2,
+				'mobile_default' => 1,
+				'description'    => __( 'Con questo numero di card o meno lo scorrimento si blocca. Si imposta per dispositivo; 0 = mai.', 'lu3g-carousel' ),
+				'condition'      => array( 'lock_scroll' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'lock_align',
+			array(
+				'label'       => __( 'Card bloccate', 'lu3g-carousel' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'fill',
+				'options'     => array(
+					'fill'   => __( 'Occupano tutta la larghezza', 'lu3g-carousel' ),
+					'start'  => __( 'Larghezza normale, a sinistra', 'lu3g-carousel' ),
+					'center' => __( 'Larghezza normale, al centro', 'lu3g-carousel' ),
+					'end'    => __( 'Larghezza normale, a destra', 'lu3g-carousel' ),
+				),
+				'description' => __( 'Con "Larghezza normale" le card restano larghe come nel carosello e si stringono solo se non ci stanno.', 'lu3g-carousel' ),
+				'condition'   => array( 'lock_scroll' => 'yes' ),
+			)
+		);
+
 
 		$this->add_control(
 			'scroll_speed',
@@ -2504,6 +2548,37 @@ class Repeater_Carousel extends Widget_Base {
 				'selectors' => array(
 					'{{WRAPPER}} .lu3g-carousel__body' => 'flex-direction: {{VALUE}};',
 				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'icon_align',
+			array(
+				'label'                => __( 'Allineamento', 'lu3g-carousel' ),
+				'type'                 => Controls_Manager::CHOOSE,
+				'options'              => array(
+					'left'   => array(
+						'title' => __( 'Sinistra', 'lu3g-carousel' ),
+						'icon'  => 'eicon-text-align-left',
+					),
+					'center' => array(
+						'title' => __( 'Centro', 'lu3g-carousel' ),
+						'icon'  => 'eicon-text-align-center',
+					),
+					'right'  => array(
+						'title' => __( 'Destra', 'lu3g-carousel' ),
+						'icon'  => 'eicon-text-align-right',
+					),
+				),
+				'selectors_dictionary' => array(
+					'left'   => 'flex-start',
+					'center' => 'center',
+					'right'  => 'flex-end',
+				),
+				'selectors'            => array(
+					'{{WRAPPER}} .lu3g-carousel__icon' => 'justify-content: {{VALUE}};',
+				),
+				'description'          => __( 'Con l\'icona sopra o sotto il testo.', 'lu3g-carousel' ),
 			)
 		);
 
@@ -3756,6 +3831,7 @@ class Repeater_Carousel extends Widget_Base {
 			'transform'         => true,
 			'clip-path'         => true,
 			'clip-rule'         => true,
+			'mask'              => true,
 			'style'             => true,
 		);
 
@@ -3782,12 +3858,140 @@ class Repeater_Carousel extends Widget_Base {
 			'polyline'       => array_merge( $attrs, array( 'points' => true ) ),
 			'polygon'        => array_merge( $attrs, array( 'points' => true ) ),
 			'defs'           => array(),
-			'clippath'       => array( 'id' => true ),
+			'clippath'       => array( 'id' => true, 'clippathunits' => true, 'transform' => true ),
+			// Le maschere vanno tenute: senza il tag le forme che contengono,
+			// di solito rettangoli bianchi, finirebbero visibili sull'icona.
+			'mask'           => array(
+				'id'               => true,
+				'x'                => true,
+				'y'                => true,
+				'width'            => true,
+				'height'           => true,
+				'maskunits'        => true,
+				'maskcontentunits' => true,
+				'style'            => true,
+			),
 			'title'          => array(),
 			'lineargradient' => array( 'id' => true, 'x1' => true, 'y1' => true, 'x2' => true, 'y2' => true, 'gradientunits' => true ),
 			'radialgradient' => array( 'id' => true, 'cx' => true, 'cy' => true, 'r' => true, 'gradientunits' => true ),
 			'stop'           => array( 'offset' => true, 'stop-color' => true, 'stop-opacity' => true ),
 		);
+	}
+
+	/**
+	 * Regole del blocco dello scorrimento, per dispositivo.
+	 *
+	 * Per ogni breakpoint attivo di Elementor dice se, con questo numero di
+	 * card, lo scorrimento va bloccato. I valori vuoti ereditano dal
+	 * dispositivo più grande, come fa Elementor con i controlli responsive:
+	 * laptop e tablet dal desktop, mobile dal tablet, widescreen dal desktop.
+	 *
+	 * Il JS parte da "base" e applica in ordine le regole la cui media query
+	 * corrisponde: l'ultima vince, quindi le max-width vanno dalla più
+	 * larga alla più stretta.
+	 *
+	 * @param array $settings Impostazioni del widget.
+	 * @param int   $count    Numero di card.
+	 * @return array|null Null se il blocco non può mai scattare.
+	 */
+	private function lu3g_lock_rules( $settings, $count ) {
+		if ( 'yes' !== $settings['lock_scroll'] || $count < 1 ) {
+			return null;
+		}
+
+		$value = function ( $key, $fallback ) use ( $settings ) {
+			$raw = isset( $settings[ $key ] ) ? $settings[ $key ] : '';
+			return ( '' === $raw || null === $raw ) ? $fallback : max( 0, (int) $raw );
+		};
+
+		$desktop = $value( 'lock_max_cards', 3 );
+		$locks   = function ( $max ) use ( $count ) {
+			return $max > 0 && $count <= $max;
+		};
+
+		// Breakpoint attivi: nome => array( valore px, direzione ).
+		$breakpoints = array();
+
+		if ( class_exists( '\Elementor\Plugin' ) && isset( \Elementor\Plugin::$instance->breakpoints )
+			&& method_exists( \Elementor\Plugin::$instance->breakpoints, 'get_active_breakpoints' ) ) {
+			foreach ( \Elementor\Plugin::$instance->breakpoints->get_active_breakpoints() as $name => $bp ) {
+				$breakpoints[ $name ] = array( (int) $bp->get_value(), $bp->get_direction() );
+			}
+		}
+
+		if ( empty( $breakpoints ) ) {
+			$breakpoints = array(
+				'tablet' => array( 1024, 'max' ),
+				'mobile' => array( 767, 'max' ),
+			);
+		}
+
+		$rules = array();
+
+		if ( isset( $breakpoints['widescreen'] ) ) {
+			$rules[] = array(
+				'q'    => '(min-width: ' . $breakpoints['widescreen'][0] . 'px)',
+				'lock' => $locks( $value( 'lock_max_cards_widescreen', $desktop ) ),
+			);
+			unset( $breakpoints['widescreen'] );
+		}
+
+		// Dal più largo al più stretto, ognuno eredita dal precedente.
+		uasort(
+			$breakpoints,
+			function ( $a, $b ) {
+				return $b[0] - $a[0];
+			}
+		);
+
+		$inherited = $desktop;
+
+		foreach ( $breakpoints as $name => $bp ) {
+			$inherited = $value( 'lock_max_cards_' . $name, $inherited );
+			$rules[]   = array(
+				'q'    => '(max-width: ' . $bp[0] . 'px)',
+				'lock' => $locks( $inherited ),
+			);
+		}
+
+		$base = $locks( $desktop );
+		$any  = $base;
+
+		foreach ( $rules as $rule ) {
+			$any = $any || $rule['lock'];
+		}
+
+		return $any ? array( 'base' => $base, 'rules' => $rules ) : null;
+	}
+
+	/**
+	 * Rende unici gli id interni di un SVG inserito nella pagina.
+	 *
+	 * Maschere, clip e gradienti si richiamano per id. Gli editor vettoriali
+	 * esportano id generici (mask0_1_2, clip0...) che si ripetono tra file
+	 * diversi: due icone nella stessa pagina si "ruberebbero" la maschera.
+	 * Il prefisso dipende dall'allegato, quindi la stessa icona ripetuta in
+	 * più card resta identica.
+	 *
+	 * @param string $svg    Markup dell'SVG.
+	 * @param string $prefix Prefisso da anteporre agli id.
+	 * @return string
+	 */
+	private function lu3g_prefix_svg_ids( $svg, $prefix ) {
+		if ( ! preg_match_all( '/\bid\s*=\s*(["\'])([^"\']+)\1/i', $svg, $m ) ) {
+			return $svg;
+		}
+
+		foreach ( array_unique( $m[2] ) as $old ) {
+			$q   = preg_quote( $old, '/' );
+			$new = $prefix . $old;
+
+			$svg = preg_replace( '/\bid\s*=\s*(["\'])' . $q . '\1/', 'id=$1' . $new . '$1', $svg );
+			$svg = preg_replace( '/url\(\s*([\'"]?)#' . $q . '\1\s*\)/', 'url(#' . $new . ')', $svg );
+			$svg = preg_replace( '/(href\s*=\s*["\'])#' . $q . '(["\'])/', '${1}#' . $new . '$2', $svg );
+		}
+
+		return $svg;
 	}
 
 	/**
@@ -3844,6 +4048,8 @@ class Repeater_Carousel extends Widget_Base {
 					$svg = preg_replace( '/<\?xml.*?\?>/is', '', $svg );
 					$svg = preg_replace( '/<!--.*?-->/s', '', $svg );
 					$svg = preg_replace( '/<!DOCTYPE.*?>/is', '', $svg );
+
+					$svg = $this->lu3g_prefix_svg_ids( $svg, 'lu3g-svg' . $id . '-' );
 
 					return wp_kses( trim( $svg ), $this->lu3g_allowed_svg_tags() );
 				}
@@ -4807,6 +5013,9 @@ class Repeater_Carousel extends Widget_Base {
 				'truncate_target'    => 'title',
 				'button_icon'        => array(),
 				'button_display'     => 'text_icon',
+				'lock_scroll'        => '',
+				'lock_max_cards'     => 3,
+				'lock_align'         => 'fill',
 				'icon_field'         => '',
 				'truncate'           => '',
 				'expand_label'       => __( 'Mostra di più', 'lu3g-carousel' ),
@@ -4995,6 +5204,20 @@ class Repeater_Carousel extends Widget_Base {
 
 		if ( 'yes' === $settings['hide_arrows_mobile'] ) {
 			$classes[] = 'lu3g-carousel--hide-arrows-mobile';
+		}
+
+		// Blocco con poche card: le regole per dispositivo le valuta il JS,
+		// perché il dispositivo si conosce solo nel browser.
+		$lock_rules = $this->lu3g_lock_rules( $settings, count( $items ) );
+
+		if ( $lock_rules ) {
+			$lock_align = in_array( $settings['lock_align'], array( 'fill', 'start', 'center', 'end' ), true )
+				? $settings['lock_align']
+				: 'fill';
+
+			$classes[] = 'lu3g-carousel--lock-' . $lock_align;
+
+			$this->add_render_attribute( 'wrapper', 'data-lu3g-lock', wp_json_encode( $lock_rules ) );
 		}
 
 		$this->add_render_attribute(

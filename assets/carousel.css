@@ -1222,6 +1222,45 @@ span.lu3g-carousel__button {
 	font-size: 14px;
 }
 
+/* ---------------------------------------------------------------------------
+ * Scorrimento bloccato con poche card
+ *
+ * is-locked la mette il JS quando, al dispositivo attuale, il numero di card
+ * è entro la soglia del pannello. Il carosello diventa una riga ferma: niente
+ * scroll, frecce o indicatori. Loop, autoplay e modalità centrata li spegne
+ * il JS stesso.
+ * ------------------------------------------------------------------------ */
+
+.lu3g-carousel.is-locked .lu3g-carousel__viewport {
+	overflow-x: hidden;
+	scroll-snap-type: none;
+}
+
+.lu3g-carousel.is-locked .lu3g-carousel__nav,
+.lu3g-carousel.is-locked .lu3g-carousel__indicators {
+	display: none;
+}
+
+/* Tutta la larghezza: le card si dividono lo spazio in parti uguali. */
+.lu3g-carousel.lu3g-carousel--lock-fill.is-locked .lu3g-carousel__card {
+	flex: 1 1 0;
+	max-width: none;
+}
+
+/* Larghezza normale: restano come nel carosello, ma si stringono se la
+   riga non le contiene tutte, invece di finire tagliate. */
+.lu3g-carousel.is-locked:not(.lu3g-carousel--lock-fill) .lu3g-carousel__card {
+	flex-shrink: 1;
+}
+
+.lu3g-carousel--lock-center.is-locked .lu3g-carousel__track {
+	justify-content: center;
+}
+
+.lu3g-carousel--lock-end.is-locked .lu3g-carousel__track {
+	justify-content: flex-end;
+}
+
 /* Frecce nascoste quando tutte le card sono già visibili. is-static la
    aggiunge il JS, quindi senza JS le frecce restano come sono. */
 .lu3g-carousel--hide-idle-arrows.is-static .lu3g-carousel__nav {

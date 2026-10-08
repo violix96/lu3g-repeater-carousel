@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.14.1
+Documentazione del plugin — versione 1.16.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -164,7 +164,7 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Sottocampo etichetta | *(dinamico)* Testo breve sopra il titolo. |
 | Blocchi di testo | *(dinamico)* Sottocampi da mostrare sotto il titolo, ognuno con uno stile. |
 | Testo del pulsante | *(dinamico)* Testo fisso o `%sottocampo%`. Con *Dal primo link nel testo* anche `%testo_link%`, le parole del link trovato; vuoto = "Scopri di più". |
-| Sottocampo icona | *(dinamico)* Sottocampo media. Gli SVG diventano ricolorabili. |
+| Sottocampo icona | *(dinamico)* Sottocampo media. Gli SVG vengono inseriti nel markup e diventano ricolorabili; maschere, clip e gradienti sono mantenuti. |
 | Link della card | *(dinamico)* *Da un sottocampo link*; *Dal primo link nel testo*: cerca un `<a href>` nel titolo e nei blocchi di testo, lo sposta sul pulsante e lo toglie dal testo; *Da sottocampi del repeater*: link e testo del pulsante da due sottocampi dedicati, senza toccare il testo. Nelle ultime due il pulsante compare solo sulle card che hanno un link. |
 | Sottocampo URL / Sottocampo testo pulsante | *(dinamico, Da sottocampi del repeater)* Nomi dei due sottocampi, di default `link_bottone` e `testo_bottone`. |
 | Apri in una nuova scheda | *(dinamico, Da sottocampi del repeater)* Per i pulsanti di questa modalità. |
@@ -219,6 +219,9 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 
 | Controllo | Cosa fa |
 |---|---|
+| Blocca con poche card | Con poche card il carosello diventa una riga ferma: niente scorrimento, frecce, indicatori, scorrimento infinito, autoplay e modalità centrata. |
+| Blocca fino a (card) **R** | Soglia per dispositivo: con questo numero di card o meno si blocca. Default 3 / 2 / 1 (desktop / tablet / mobile); 0 = mai. |
+| Card bloccate | *Occupano tutta la larghezza* (parti uguali) oppure *Larghezza normale* a sinistra, al centro o a destra. |
 | Velocità di scorrimento | Durata dell'animazione a ogni scatto, per frecce, indicatori e autoplay. |
 | Aggancio allo scroll | Le card si allineano al bordo quando lo scorrimento si ferma. |
 | Scorrimento infinito | Dopo l'ultima card si riparte dalla prima. Servono almeno due card. |
@@ -261,7 +264,7 @@ Le sezioni seguono l'ordine degli elementi nella card. Dove c'è un effetto hove
 |---|---|
 | Card | Sfondo e bordo (normale / hover), raggio dei bordi, padding. Con le immagini il padding non crea cornici: la foto copre l'intera card. |
 | Immagini | *(immagini)* Adattamento (riempi ritagliando, o intera), punto di ritaglio **R**, zoom in hover, velatura in hover. |
-| Icona | Posizione rispetto al testo (sopra, sotto, sinistra, destra) **R**, dimensione, distanza dal testo, colore (normale / hover). |
+| Icona | Posizione rispetto al testo (sopra, sotto, sinistra, destra) **R**, allineamento a sinistra, al centro o a destra (con l'icona sopra o sotto) **R**, dimensione, distanza dal testo, colore (normale / hover). |
 | Etichetta | Tipografia, distanza dal titolo, colore (normale / hover). |
 | Titolo | Tipografia, allineamento, righe riservate, colore (normale / hover). |
 | Stile testo 1, 2, 3 | Tipografia, distanza dal blocco sopra, colore (normale / hover). |
@@ -348,6 +351,16 @@ Con `%testo_link%` nel *Testo del pulsante* del widget, per esempio `Vai a: %tes
 5. Facoltativo: *Scorrimento infinito*, così ai lati ci sono sempre card.
 
 Con 1 card visibile e anteprima al 40% la card centrale occupa il 60% della larghezza: senza scorrimento infinito, all'inizio a sinistra c'è uno spazio vuoto, che permette alla prima card di stare al centro. Funziona anche col tipo di contenuto *Immagini*.
+
+### Poche card ferme su desktop, carosello su mobile
+
+Per esempio tre card che su desktop devono stare ferme una accanto all'altra e su mobile scorrere:
+
+1. *Scorrimento → Blocca con poche card*: attivo.
+2. *Blocca fino a*: 3 su desktop, 3 su tablet se ci stanno, 1 su mobile.
+3. *Card bloccate*: **Occupano tutta la larghezza**.
+
+Su desktop le tre card riempiono la riga, senza frecce. Su mobile tornano carosello, con frecce, loop e autoplay se sono attivi. Se un giorno le card diventano quattro, anche su desktop torna lo scorrimento.
 
 ### Carosello che gira da solo
 
@@ -506,6 +519,12 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.16.0**
+- Blocco dello scorrimento con poche card, per dispositivo.
+
+**1.15.0**
+- Allineamento dell'icona; corretto il fondo bianco sulle icone SVG con maschere.
 
 **1.14.1**
 - Il pulsante compare solo sulle righe che hanno il sottocampo link compilato.
