@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.13.0
+Documentazione del plugin — versione 1.14.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -165,7 +165,9 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Blocchi di testo | *(dinamico)* Sottocampi da mostrare sotto il titolo, ognuno con uno stile. |
 | Testo del pulsante | *(dinamico)* Testo fisso o `%sottocampo%`. Con *Dal primo link nel testo* anche `%testo_link%`, le parole del link trovato; vuoto = "Scopri di più". |
 | Sottocampo icona | *(dinamico)* Sottocampo media. Gli SVG diventano ricolorabili. |
-| Link della card | *(dinamico)* *Da un sottocampo link*, oppure *Dal primo link nel testo*: cerca un `<a href>` nel titolo e nei blocchi di testo, lo sposta sul pulsante e lo toglie dal testo. Il pulsante compare solo sulle card che hanno un link. |
+| Link della card | *(dinamico)* *Da un sottocampo link*; *Dal primo link nel testo*: cerca un `<a href>` nel titolo e nei blocchi di testo, lo sposta sul pulsante e lo toglie dal testo; *Da sottocampi del repeater*: link e testo del pulsante da due sottocampi dedicati, senza toccare il testo. Nelle ultime due il pulsante compare solo sulle card che hanno un link. |
+| Sottocampo URL / Sottocampo testo pulsante | *(dinamico, Da sottocampi del repeater)* Nomi dei due sottocampi, di default `link_bottone` e `testo_bottone`. |
+| Apri in una nuova scheda | *(dinamico, Da sottocampi del repeater)* Per i pulsanti di questa modalità. |
 | Sottocampo link | *(dinamico)* Va sul pulsante; senza pulsante rende cliccabile la card. |
 | Apri in una nuova scheda | *(dinamico)* Per il link della card o del pulsante. |
 | Formato avanzato | *(dinamico)* Titolo composto con `%sottocampo%`. |
@@ -318,6 +320,24 @@ Quando i link sono scritti dentro i testi del repeater, per esempio un titolo ch
 2. *Testo del pulsante*: per esempio `Leggi`, oppure `%testo_link%` per usare le parole del link stesso. Se lo lasci vuoto viene usato "Scopri di più". Se vuoi solo la freccia: *Opzioni del contenuto → Contenuto del pulsante → Solo icona*.
 
 Su ogni card il plugin cerca il primo link nel titolo e poi nei blocchi di testo. Se lo trova, il pulsante compare con quel link, e si apre in una nuova scheda se il link aveva `target="_blank"`. Nel testo il link viene tolto e resta solo il suo contenuto, così il titolo non diventa cliccabile due volte. Sulle card senza link il pulsante non compare.
+
+### Pulsante da due sottocampi del repeater
+
+Quando nel repeater JetEngine hai un sottocampo per il link e uno per il testo del pulsante, per esempio `link_bottone` e `testo_bottone`:
+
+1. *Card → Link della card*: **Da sottocampi del repeater**.
+2. *Sottocampo URL* e *Sottocampo testo pulsante*: i nomi dei due sottocampi (già compilati con `link_bottone` e `testo_bottone`).
+3. Facoltativo: *Apri in una nuova scheda*.
+
+Per ogni card:
+
+| Sottocampo URL | Sottocampo testo | Pulsante |
+|---|---|---|
+| vuoto | qualsiasi | nessun pulsante |
+| compilato | compilato | il testo del sottocampo |
+| compilato | vuoto | il *Testo del pulsante* del widget, oppure "Scopri di più" |
+
+Con `%testo_link%` nel *Testo del pulsante* del widget, per esempio `Vai a: %testo_link%`, il segnaposto prende il valore del sottocampo testo; se quello è vuoto il pulsante dice "Scopri di più". Il testo della card resta com'è: eventuali link scritti nei testi restano link.
 
 ### Carosello "vetrina" con la card centrale in evidenza
 
@@ -486,6 +506,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.14.0**
+- *Link della card → Da sottocampi del repeater*.
 
 **1.13.0**
 - Pulsante con solo testo, solo icona o entrambi; `%testo_link%` per il testo del pulsante.

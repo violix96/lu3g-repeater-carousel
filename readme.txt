@@ -4,7 +4,7 @@ Tags: elementor, jetengine, carousel, repeater, slider
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.13.0
+Stable tag: 1.14.0
 License: GPLv2 or later
 
 Widget Elementor per caroselli di card da repeater JetEngine, da contenuto statico o da sole immagini.
@@ -17,4 +17,7 @@ La documentazione completa è nel file DOCUMENTAZIONE.md incluso nel plugin.
 
 == Changelog ==
 
-Vedi CHANGELOG.md.
+= 1.14.0 =
+* Nuova opzione Link della card → Da sottocampi del repeater: link e testo del pulsante letti da due sottocampi dedicati.
+
+Storico completo in CHANGELOG.md.
