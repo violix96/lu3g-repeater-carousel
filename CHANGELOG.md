@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.14.1
+- Corretto: con *Link della card → Da un sottocampo link* il pulsante compariva su tutte le card, anche su quelle con il sottocampo link vuoto, come pulsante non cliccabile. Ora compare solo se la riga ha il link. Se il *Sottocampo link* non è indicato, il pulsante resta come prima.
+
 ## 1.14.0
 - Nuova opzione *Link della card → Da sottocampi del repeater* per la sorgente dinamica: link e testo del pulsante si leggono da due sottocampi dedicati (*Sottocampo URL*, di default `link_bottone`, e *Sottocampo testo pulsante*, di default `testo_bottone`), con il suo interruttore *Apri in una nuova scheda*. Il testo della card non viene modificato.
 - Le card senza URL non hanno il pulsante. Con l'URL e senza testo si usa il *Testo del pulsante* del widget, altrimenti "Scopri di più". `%testo_link%` nel *Testo del pulsante* riprende il valore del sottocampo testo.

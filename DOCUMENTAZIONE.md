@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.14.0
+Documentazione del plugin — versione 1.14.1
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -168,7 +168,7 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Link della card | *(dinamico)* *Da un sottocampo link*; *Dal primo link nel testo*: cerca un `<a href>` nel titolo e nei blocchi di testo, lo sposta sul pulsante e lo toglie dal testo; *Da sottocampi del repeater*: link e testo del pulsante da due sottocampi dedicati, senza toccare il testo. Nelle ultime due il pulsante compare solo sulle card che hanno un link. |
 | Sottocampo URL / Sottocampo testo pulsante | *(dinamico, Da sottocampi del repeater)* Nomi dei due sottocampi, di default `link_bottone` e `testo_bottone`. |
 | Apri in una nuova scheda | *(dinamico, Da sottocampi del repeater)* Per i pulsanti di questa modalità. |
-| Sottocampo link | *(dinamico)* Va sul pulsante; senza pulsante rende cliccabile la card. |
+| Sottocampo link | *(dinamico)* Va sul pulsante; senza pulsante rende cliccabile la card. Le righe con il sottocampo vuoto non hanno il pulsante. |
 | Apri in una nuova scheda | *(dinamico)* Per il link della card o del pulsante. |
 | Formato avanzato | *(dinamico)* Titolo composto con `%sottocampo%`. |
 | ID del post | *(dinamico)* Vuoto = post corrente. |
@@ -506,6 +506,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.14.1**
+- Il pulsante compare solo sulle righe che hanno il sottocampo link compilato.
 
 **1.14.0**
 - *Link della card → Da sottocampi del repeater*.
