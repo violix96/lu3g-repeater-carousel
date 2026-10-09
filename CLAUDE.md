@@ -7,7 +7,7 @@ Questo file serve a riprendere il lavoro in una nuova sessione. Leggilo prima di
 - Autore: Vincenzo, LU3G Agenzia Web (GitHub `violix96`). Si lavora in **italiano**, risposte brevi e pratiche.
 - Plugin WordPress: widget Elementor **"Carosello repeater"** (nome `lu3g-repeater-carousel`, categoria LU3G). Carosello a scroll orizzontale nativo con snap, alimentato da un repeater JetEngine, da card scritte a mano o da una galleria di immagini.
 - Repository: `violix96/lu3g-repeater-carousel` (pubblico, branch `main`). È la fonte di verità.
-- Versione attuale: **1.19.0**.
+- Versione attuale: **1.20.0**.
 
 ## File
 
@@ -64,6 +64,7 @@ Questo file serve a riprendere il lavoro in una nuova sessione. Leggilo prima di
 - 1.17.0: `content_layout` = `rows` (classi `--spread` + `--rows`); JS `setupRows` imposta min-height per gruppo (icon, kicker, title, toggle, blockN, contati per tipo) usando offsetHeight; salta i clamp delle card espanse.
 - 1.18.0: effetto vetro `card_backdrop` (switcher con selectors che scrive backdrop-filter + -webkit-), `card_backdrop_blur` (responsive) e `card_backdrop_saturate` come variabili `--lu3g-backdrop-*`, `card_backdrop_blur_hover` che ridefinisce la variabile su `.card:hover`.
 - 1.19.0: `truncate_target` anche `block_2`..`block_5` e `all_blocks` (helper `lu3g_clamp_positions`); il render costruisce `$text_blocks` (descrizione + blocchi) e mette un toggle dopo ogni blocco troncato. JS: stato aperto sul testo (`.lu3g-carousel__clamp.is-open`), la card ha `is-expanded` se almeno un testo è aperto; `clampOf(toggle)` = elemento prima del toggle-wrap; nel loop si apre il toggle nella stessa posizione delle copie.
+- 1.20.0: `truncate_lines` min 0. JS `hiddenMode()` legge `--lu3g-lines` calcolata su root: se < 1 i clamp ricevono `is-hidden-text` (display none finché non `is-open`) e il pulsante è sempre visibile; applicato anche in modo sincrono all'init, prima di `setupRows`. Senza questo, 0 rendeva `-webkit-line-clamp` invalido e il pulsante non compariva.
 - 1.12.0/1.12.1: modalità centrata (`center_mode`, `center_side_scale`, `center_side_opacity`, `center_main_scale` default 1.04, `center_shadow`); con 3 card visibili la seconda è subito al centro senza scorrere. JS: `updateCenter`/`scheduleCenter` assegnano `.is-center`.
 
 ## Come si testa

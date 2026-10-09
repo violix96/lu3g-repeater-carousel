@@ -1150,9 +1150,10 @@ class Repeater_Carousel extends Widget_Base {
 				'label'      => __( 'Righe visibili', 'lu3g-carousel' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( '' ),
+				'description' => __( 'Con 0 il testo è nascosto del tutto e al suo posto resta solo il pulsante per aprirlo.', 'lu3g-carousel' ),
 				'range'      => array(
 					'' => array(
-						'min'  => 1,
+						'min'  => 0,
 						'max'  => 12,
 						'step' => 1,
 					),

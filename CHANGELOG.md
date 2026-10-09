@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.20.0
+- *Righe visibili* accetta 0: il testo scelto in *Cosa troncare* resta nascosto del tutto e al suo posto c'è solo il pulsante per aprirlo, sempre visibile. Per esempio il secondo blocco di testo nascosto dietro "Scopri di più". Il valore si imposta per dispositivo.
+
 ## 1.19.0
 - *Opzioni del contenuto → Cosa troncare* ora offre anche il secondo, terzo, quarto e quinto blocco di testo, e *Tutti i blocchi di testo*. Ogni testo troncato ha il suo "Mostra di più" e si apre da solo, anche con lo scorrimento infinito.
 - Con un blocco preciso, le card che non ce l'hanno restano intere.
