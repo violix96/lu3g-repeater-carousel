@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.17.0
+Documentazione del plugin — versione 1.18.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -262,7 +262,7 @@ Le sezioni seguono l'ordine degli elementi nella card. Dove c'è un effetto hove
 
 | Sezione | Controlli |
 |---|---|
-| Card | Sfondo e bordo (normale / hover), raggio dei bordi, padding. Con le immagini il padding non crea cornici: la foto copre l'intera card. |
+| Card | Sfondo e bordo (normale / hover), raggio dei bordi, padding, effetto vetro (sfocatura **R**, saturazione, sfocatura in hover). Con le immagini il padding non crea cornici: la foto copre l'intera card. |
 | Immagini | *(immagini)* Adattamento (riempi ritagliando, o intera), punto di ritaglio **R**, zoom in hover, velatura in hover. |
 | Icona | Posizione rispetto al testo (sopra, sotto, sinistra, destra) **R**, allineamento a sinistra, al centro o a destra (con l'icona sopra o sotto) **R**, dimensione, distanza dal testo, colore (normale / hover). |
 | Etichetta | Tipografia, distanza dal titolo, colore (normale / hover). |
@@ -317,6 +317,17 @@ Le altre card restano sui colori generali.
 2. *Indicatori di posizione*: **Tipo** *Barra di avanzamento*, **Posizione** *Tra le due frecce*.
 
 Risultato: `← ━━━━──── →`. Con **Tipo** *Puntini* si ottiene `← ● ○ ○ →`.
+
+### Card in vetro sopra una foto
+
+Card trasparenti che sfocano lo sfondo della sezione, come i pannelli di iOS:
+
+1. Metti un'immagine o un gradiente come sfondo della **sezione** (o del contenitore) che contiene il widget.
+2. *Stile → Card → Sfondo*: un colore con opacità bassa, per esempio bianco al 20–30%, o nero al 20% su foto chiare.
+3. *Bordo*: sottile, bianco al 40–50%: dà il bordo "di vetro".
+4. *Effetto vetro*: attivo, *Sfocatura* 10–16px, *Saturazione* 140–180%.
+
+Con uno sfondo della card pieno l'effetto non si vede, perché la card copre ciò che c'è dietro. Su schermi poco potenti molte card in vetro grandi possono rallentare lo scorrimento: in quel caso abbassa la sfocatura su mobile.
 
 ### Card con foto di sfondo e testo leggibile
 
@@ -530,6 +541,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.18.0**
+- Effetto vetro sulle card.
 
 **1.17.0**
 - Distribuzione *Allineato riga per riga*.
