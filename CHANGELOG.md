@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.19.0
+- *Opzioni del contenuto → Cosa troncare* ora offre anche il secondo, terzo, quarto e quinto blocco di testo, e *Tutti i blocchi di testo*. Ogni testo troncato ha il suo "Mostra di più" e si apre da solo, anche con lo scorrimento infinito.
+- Con un blocco preciso, le card che non ce l'hanno restano intere.
+
 ## 1.18.0
 - Nuovo *Stile → Card → Effetto vetro*: sfoca ciò che sta dietro le card (backdrop-filter), con sfocatura per dispositivo, saturazione e sfocatura in hover. Funziona anche su Safari e iOS. Richiede uno sfondo della card semitrasparente.
 

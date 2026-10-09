@@ -324,7 +324,9 @@
 	overflow: visible;
 }
 
-.lu3g-carousel--clamp .lu3g-carousel__card.is-expanded .lu3g-carousel__clamp {
+/* Si apre solo il testo del pulsante premuto: una card può avere più
+   testi troncati, ognuno con il suo "Mostra di più". */
+.lu3g-carousel--clamp .lu3g-carousel__clamp.is-open {
 	display: block;
 	-webkit-line-clamp: none;
 	line-clamp: none;
