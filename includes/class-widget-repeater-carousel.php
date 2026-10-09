@@ -1133,8 +1133,13 @@ class Repeater_Carousel extends Widget_Base {
 				'options'     => array(
 					'title'       => __( 'Il titolo', 'lu3g-carousel' ),
 					'description' => __( 'Il primo blocco di testo', 'lu3g-carousel' ),
+					'block_2'     => __( 'Il secondo blocco di testo', 'lu3g-carousel' ),
+					'block_3'     => __( 'Il terzo blocco di testo', 'lu3g-carousel' ),
+					'block_4'     => __( 'Il quarto blocco di testo', 'lu3g-carousel' ),
+					'block_5'     => __( 'Il quinto blocco di testo', 'lu3g-carousel' ),
+					'all_blocks'  => __( 'Tutti i blocchi di testo', 'lu3g-carousel' ),
 				),
-				'description' => __( 'Si tronca il primo blocco di testo. Sulle card che non ce l\'hanno viene troncato il titolo.', 'lu3g-carousel' ),
+				'description' => __( 'Ogni testo troncato ha il suo "Mostra di più" e si apre da solo. Con il primo blocco o con tutti, sulle card senza blocchi di testo viene troncato il titolo; con un blocco preciso, le card che non ce l\'hanno restano intere.', 'lu3g-carousel' ),
 				'condition'   => array( 'truncate' => 'yes' ),
 			)
 		);
@@ -3967,6 +3972,32 @@ class Repeater_Carousel extends Widget_Base {
 	}
 
 	/**
+	 * Quali testi di una card troncare.
+	 *
+	 * @param string $target Valore di "Cosa troncare".
+	 * @param int    $count  Numero di blocchi di testo della card.
+	 * @return array Posizioni dei blocchi (da 0), oppure 'title'.
+	 */
+	private function lu3g_clamp_positions( $target, $count ) {
+		if ( 'all_blocks' === $target ) {
+			return $count ? range( 0, $count - 1 ) : array( 'title' );
+		}
+
+		if ( 'description' === $target ) {
+			return $count ? array( 0 ) : array( 'title' );
+		}
+
+		// Un blocco preciso: se la card non ce l'ha resta intera, invece di
+		// troncare a sorpresa un altro testo.
+		if ( preg_match( '/^block_([2-9])$/', (string) $target, $m ) ) {
+			$position = (int) $m[1] - 1;
+			return $position < $count ? array( $position ) : array();
+		}
+
+		return array( 'title' );
+	}
+
+	/**
 	 * Regole del blocco dello scorrimento, per dispositivo.
 	 *
 	 * Per ogni breakpoint attivo di Elementor dice se, con questo numero di
@@ -5421,20 +5452,31 @@ class Repeater_Carousel extends Widget_Base {
 									<span class="lu3g-carousel__icon" aria-hidden="true"><?php echo $item['icon']; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
 								<?php endif; ?>
 								<?php
-								// Si tronca la descrizione se richiesto e se c'è;
-								// altrimenti il titolo, che c'è sempre.
-								$clamp_description = $truncate
-									&& 'description' === $settings['truncate_target']
-									&& '' !== $item['description'];
-								$clamp_title       = $truncate && ! $clamp_description;
+								// Blocchi di testo nell'ordine in cui si vedono: la
+								// descrizione, se c'è, è il primo. Il PHP decide quali
+								// troncare; ognuno ha il suo "Mostra di più".
+								$text_blocks = array();
+
+								if ( '' !== $item['description'] ) {
+									// La classe __description resta per compatibilità con
+									// CSS scritti a mano.
+									$text_blocks[] = array(
+										'html'  => $item['description'],
+										'class' => 'lu3g-carousel__block lu3g-carousel__block--style-' . $item['desc_style'] . ' lu3g-carousel__description',
+									);
+								}
+
+								foreach ( $item['blocks'] as $block ) {
+									$text_blocks[] = array(
+										'html'  => $block['html'],
+										'class' => 'lu3g-carousel__block lu3g-carousel__block--style-' . $block['style'],
+									);
+								}
+
+								$clamp_blocks = $truncate ? $this->lu3g_clamp_positions( $settings['truncate_target'], count( $text_blocks ) ) : array();
+								$clamp_title  = $truncate && in_array( 'title', $clamp_blocks, true );
 
 								$title_class = 'lu3g-carousel__text' . ( $clamp_title ? ' lu3g-carousel__clamp' : '' );
-								// La descrizione resta un blocco come gli altri, con la
-								// classe dello stile scelto; la classe __description
-								// resta per compatibilità con CSS scritti a mano.
-								$desc_class = 'lu3g-carousel__block lu3g-carousel__block--style-' . $item['desc_style']
-									. ' lu3g-carousel__description'
-									. ( $clamp_description ? ' lu3g-carousel__clamp' : '' );
 								?>
 								<div class="lu3g-carousel__content">
 									<?php if ( '' !== $item['kicker'] ) : ?>
@@ -5447,17 +5489,14 @@ class Repeater_Carousel extends Widget_Base {
 									}
 									?>
 
-									<?php if ( '' !== $item['description'] ) : ?>
-										<div class="<?php echo esc_attr( $desc_class ); ?>"><?php echo $item['description']; // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
+									<?php foreach ( $text_blocks as $position => $block ) : ?>
+										<?php $clamp_this = in_array( $position, $clamp_blocks, true ); ?>
+										<div class="<?php echo esc_attr( $block['class'] . ( $clamp_this ? ' lu3g-carousel__clamp' : '' ) ); ?>"><?php echo $block['html']; // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 										<?php
-										if ( $clamp_description ) {
+										if ( $clamp_this ) {
 											echo $toggle_markup; // phpcs:ignore WordPress.Security.EscapeOutput
 										}
 										?>
-									<?php endif; ?>
-
-									<?php foreach ( $item['blocks'] as $block ) : ?>
-										<div class="lu3g-carousel__block lu3g-carousel__block--style-<?php echo esc_attr( $block['style'] ); ?>"><?php echo $block['html']; // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 									<?php endforeach; ?>
 
 									<?php if ( '' !== $item['button_text'] ) : ?>

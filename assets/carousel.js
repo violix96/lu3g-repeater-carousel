@@ -1002,8 +1002,8 @@
 
 					// Un testo aperto con "Mostra di più" non deve allargare
 					// la riga delle altre card: si misura solo da chiuso.
-					var skip = card.classList.contains( 'is-expanded' )
-						&& el.classList.contains( 'lu3g-carousel__clamp' );
+					var skip = el.classList.contains( 'lu3g-carousel__clamp' )
+						&& el.classList.contains( 'is-open' );
 
 					( groups[ pair[ 0 ] ] = groups[ pair[ 0 ] ] || [] ).push( { el: el, skip: skip } );
 				} );
@@ -1080,6 +1080,20 @@
 		}
 
 		/**
+		 * Il testo troncato di un pulsante: quello subito prima del suo
+		 * wrapper, dove lo stampa il PHP.
+		 *
+		 * @param {HTMLElement} toggle Pulsante "Mostra di più".
+		 * @return {?HTMLElement}
+		 */
+		function clampOf( toggle ) {
+			var wrap = toggle.closest( '.lu3g-carousel__toggle-wrap' );
+			var prev = wrap ? wrap.previousElementSibling : null;
+
+			return prev && prev.classList.contains( 'lu3g-carousel__clamp' ) ? prev : null;
+		}
+
+		/**
 		 * Mostra o nasconde ogni pulsante confrontando due altezze.
 		 *
 		 * Contare le righe dividendo per il line-height è fragile: con font
@@ -1090,17 +1104,14 @@
 		 */
 		function refresh() {
 			toggles.forEach( function ( toggle ) {
-				var card = toggle.closest( '.lu3g-carousel__card' );
-				// L'elemento troncato è quello marcato dal PHP: può essere il
-				// titolo o la descrizione, a seconda dell'impostazione.
-				var text = card ? card.querySelector( '.lu3g-carousel__clamp' ) : null;
+				var text = clampOf( toggle );
 
 				if ( ! text ) {
 					return;
 				}
 
-				// Su una card già aperta il pulsante resta comunque visibile.
-				if ( card.classList.contains( 'is-expanded' ) ) {
+				// Su un testo già aperto il pulsante resta comunque visibile.
+				if ( text.classList.contains( 'is-open' ) ) {
 					toggle.hidden = false;
 					return;
 				}
@@ -1127,18 +1138,25 @@
 		}
 
 		/**
-		 * Applica lo stato di espansione a una card e al suo pulsante.
+		 * Applica lo stato a un pulsante e al testo che gli sta sopra.
 		 *
-		 * @param {HTMLElement} card     Card da aggiornare.
+		 * Ogni testo troncato si apre da solo; la card è "espansa" finché
+		 * almeno uno dei suoi testi è aperto, e solo allora sospende
+		 * l'altezza fissa.
+		 *
+		 * @param {HTMLElement} toggle   Pulsante "Mostra di più".
 		 * @param {boolean}     expanded Stato da applicare.
 		 */
-		function applyState( card, expanded ) {
-			card.classList.toggle( 'is-expanded', expanded );
+		function applyState( toggle, expanded ) {
+			var text = clampOf( toggle );
+			var card = toggle.closest( '.lu3g-carousel__card' );
 
-			var toggle = card.querySelector( '[data-lu3g-toggle]' );
+			if ( text ) {
+				text.classList.toggle( 'is-open', expanded );
+			}
 
-			if ( ! toggle ) {
-				return;
+			if ( card ) {
+				card.classList.toggle( 'is-expanded', !! card.querySelector( '.lu3g-carousel__clamp.is-open' ) );
 			}
 
 			toggle.setAttribute( 'aria-expanded', expanded ? 'true' : 'false' );
@@ -1153,30 +1171,37 @@
 				event.stopPropagation();
 
 				var card = toggle.closest( '.lu3g-carousel__card' );
+				var text = clampOf( toggle );
 
-				if ( ! card ) {
+				if ( ! card || ! text ) {
 					return;
 				}
 
-				var expanded = ! card.classList.contains( 'is-expanded' );
+				var expanded = ! text.classList.contains( 'is-open' );
 				var index = card.getAttribute( 'data-lu3g-index' );
 
 				// Con lo scorrimento infinito la stessa card esiste in tre
 				// copie: se non si allineano, scorrendo si rivede la versione
-				// troncata di una card che l'utente ha appena aperto.
+				// troncata di un testo che l'utente ha appena aperto. Nelle
+				// copie si apre il pulsante nella stessa posizione.
 				if ( null !== index ) {
+					var position = Array.prototype.indexOf.call( card.querySelectorAll( '[data-lu3g-toggle]' ), toggle );
 					var twins = root.querySelectorAll(
 						'.lu3g-carousel__card[data-lu3g-index="' + index + '"]'
 					);
 
 					Array.prototype.forEach.call( twins, function ( twin ) {
-						applyState( twin, expanded );
+						var twinToggle = twin.querySelectorAll( '[data-lu3g-toggle]' )[ position ];
+
+						if ( twinToggle ) {
+							applyState( twinToggle, expanded );
+						}
 					} );
 
 					return;
 				}
 
-				applyState( card, expanded );
+				applyState( toggle, expanded );
 			} );
 		} );
 

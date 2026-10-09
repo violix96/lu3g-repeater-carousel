@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.18.0
+Documentazione del plugin — versione 1.19.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -191,7 +191,7 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Icona del pulsante | Icona o SVG accanto al testo del pulsante. Nascosta con *Solo testo*. |
 | Solo testo | Toglie i tag HTML dal titolo e dai campi JetEngine. I blocchi di testo delle card statiche mantengono sempre la formattazione dell'editor. |
 | Tronca il testo | Limita il testo a un numero di righe e aggiunge *Mostra di più*. |
-| Cosa troncare | Il titolo o il primo blocco di testo. |
+| Cosa troncare | Il titolo, il primo blocco di testo, un blocco preciso (dal secondo al quinto) o tutti i blocchi. Ogni testo troncato ha il suo *Mostra di più* e si apre da solo. Con il primo blocco o con tutti, le card senza blocchi troncano il titolo; con un blocco preciso, le card che non ce l'hanno restano intere. |
 | Righe visibili **R** | Quante righe restano visibili prima del taglio. |
 | Etichette per espandere / richiudere | I testi del pulsante, di default *Mostra di più* / *Mostra meno*. |
 
@@ -541,6 +541,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.19.0**
+- Troncamento sui blocchi di testo successivi o su tutti.
 
 **1.18.0**
 - Effetto vetro sulle card.
