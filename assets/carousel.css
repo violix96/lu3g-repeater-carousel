@@ -208,7 +208,9 @@
 		background var(--lu3g-hover-duration) ease,
 		border-color var(--lu3g-hover-duration) ease,
 		box-shadow var(--lu3g-hover-duration) ease,
-		transform var(--lu3g-hover-duration) ease;
+		transform var(--lu3g-hover-duration) ease,
+		backdrop-filter var(--lu3g-hover-duration) ease,
+		-webkit-backdrop-filter var(--lu3g-hover-duration) ease;
 }
 
 /* Larghezza fissa: ignora il calcolo e usa il valore impostato. Il numero
@@ -789,7 +791,9 @@ a.lu3g-carousel__card:focus-visible {
 		background var(--lu3g-hover-duration) ease,
 		border-color var(--lu3g-hover-duration) ease,
 		box-shadow var(--lu3g-hover-duration) ease,
-		transform var(--lu3g-hover-duration) ease;
+		transform var(--lu3g-hover-duration) ease,
+		backdrop-filter var(--lu3g-hover-duration) ease,
+		-webkit-backdrop-filter var(--lu3g-hover-duration) ease;
 }
 
 /* In rilievo: la centrale sta sopra le vicine, quindi se è più grande di 1

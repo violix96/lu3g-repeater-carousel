@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.18.0
+- Nuovo *Stile → Card → Effetto vetro*: sfoca ciò che sta dietro le card (backdrop-filter), con sfocatura per dispositivo, saturazione e sfocatura in hover. Funziona anche su Safari e iOS. Richiede uno sfondo della card semitrasparente.
+
 ## 1.17.0
 - Nuova opzione *Layout → Distribuzione del contenuto → Allineato riga per riga*: icona, etichetta, titolo e ogni blocco di testo prendono l'altezza del più alto tra le card, così titoli e testi partono tutti alla stessa quota anche se un titolo va su più righe. Il pulsante resta in fondo come in *Distribuito*. Le altezze si ricalcolano al ridimensionamento e dopo il caricamento di font e immagini.
 

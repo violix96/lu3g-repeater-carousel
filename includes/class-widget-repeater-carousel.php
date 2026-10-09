@@ -2512,6 +2512,93 @@ class Repeater_Carousel extends Widget_Base {
 				),
 			)
 		);
+
+		// Effetto vetro. Sfocatura e saturazione arrivano come variabili, così
+		// si combinano nella stessa proprietà e l'hover può cambiarne una sola.
+		// Il prefisso -webkit- serve a Safari, iOS compreso.
+		$backdrop = 'blur(var(--lu3g-backdrop-blur, 12px)) saturate(var(--lu3g-backdrop-saturate, 140%))';
+
+		$this->add_control(
+			'card_backdrop',
+			array(
+				'label'        => __( 'Effetto vetro', 'lu3g-carousel' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => '',
+				'return_value' => 'yes',
+				'separator'    => 'before',
+				'description'  => __( 'Sfoca ciò che sta dietro la card (backdrop-filter). Si vede solo con uno sfondo della card semitrasparente: imposta in Sfondo un colore con opacità, per esempio bianco al 30%.', 'lu3g-carousel' ),
+				'selectors'    => array(
+					'{{WRAPPER}} .lu3g-carousel__card' => '-webkit-backdrop-filter: ' . $backdrop . '; backdrop-filter: ' . $backdrop . ';',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'card_backdrop_blur',
+			array(
+				'label'      => __( 'Sfocatura', 'lu3g-carousel' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 40,
+					),
+				),
+				'default'    => array(
+					'unit' => 'px',
+					'size' => 12,
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .lu3g-carousel' => '--lu3g-backdrop-blur: {{SIZE}}{{UNIT}};',
+				),
+				'condition'  => array( 'card_backdrop' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'card_backdrop_saturate',
+			array(
+				'label'       => __( 'Saturazione (%)', 'lu3g-carousel' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '%' ),
+				'range'       => array(
+					'%' => array(
+						'min' => 0,
+						'max' => 300,
+					),
+				),
+				'default'     => array(
+					'unit' => '%',
+					'size' => 140,
+				),
+				'description' => __( '100% lascia i colori come sono; sopra li ravviva, come il vetro di iOS.', 'lu3g-carousel' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .lu3g-carousel' => '--lu3g-backdrop-saturate: {{SIZE}}%;',
+				),
+				'condition'   => array( 'card_backdrop' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'card_backdrop_blur_hover',
+			array(
+				'label'       => __( 'Sfocatura in hover', 'lu3g-carousel' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 40,
+					),
+				),
+				'description' => __( 'Vuoto = uguale a quella normale.', 'lu3g-carousel' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .lu3g-carousel__card:hover' => '--lu3g-backdrop-blur: {{SIZE}}{{UNIT}};',
+				),
+				'condition'   => array( 'card_backdrop' => 'yes' ),
+			)
+		);
 		$this->end_controls_section();
 	}
 
