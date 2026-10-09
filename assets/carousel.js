@@ -1094,6 +1094,21 @@
 		}
 
 		/**
+		 * Vero se "Righe visibili" vale 0 al dispositivo attuale.
+		 *
+		 * Il valore arriva come variabile CSS impostata per breakpoint,
+		 * quindi lo si legge calcolato: cambia da solo al ridimensionamento.
+		 *
+		 * @return {boolean}
+		 */
+		function hiddenMode() {
+			var raw = window.getComputedStyle( root ).getPropertyValue( '--lu3g-lines' );
+			var lines = parseFloat( raw );
+
+			return ! isNaN( lines ) && lines < 1;
+		}
+
+		/**
 		 * Mostra o nasconde ogni pulsante confrontando due altezze.
 		 *
 		 * Contare le righe dividendo per il line-height è fragile: con font
@@ -1103,6 +1118,8 @@
 		 * valori coincidono il testo non è troncato.
 		 */
 		function refresh() {
+			var hideAll = hiddenMode();
+
 			toggles.forEach( function ( toggle ) {
 				var text = clampOf( toggle );
 
@@ -1110,8 +1127,11 @@
 					return;
 				}
 
+				text.classList.toggle( 'is-hidden-text', hideAll );
+
 				// Su un testo già aperto il pulsante resta comunque visibile.
-				if ( text.classList.contains( 'is-open' ) ) {
+				// Con 0 righe il testo è nascosto: il pulsante serve sempre.
+				if ( hideAll || text.classList.contains( 'is-open' ) ) {
 					toggle.hidden = false;
 					return;
 				}
@@ -1204,6 +1224,19 @@
 				applyState( toggle, expanded );
 			} );
 		} );
+
+		// Lo stato "nascosto" si applica subito, prima che l'allineamento
+		// riga per riga misuri le altezze.
+		if ( hiddenMode() ) {
+			toggles.forEach( function ( toggle ) {
+				var text = clampOf( toggle );
+
+				if ( text ) {
+					text.classList.add( 'is-hidden-text' );
+					toggle.hidden = false;
+				}
+			} );
+		}
 
 		// La prima misura aspetta il frame successivo: al momento dell'init
 		// il layout può non essere ancora risolto e le altezze sarebbero

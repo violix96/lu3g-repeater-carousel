@@ -333,6 +333,11 @@
 	overflow: visible;
 }
 
+/* Righe visibili a 0: il testo resta nascosto finché non lo si apre. */
+.lu3g-carousel--clamp .lu3g-carousel__clamp.is-hidden-text:not(.is-open) {
+	display: none;
+}
+
 /* Il pulsante nasce hidden: il JS lo mostra solo sulle card in cui il
    testo è davvero tagliato.
 

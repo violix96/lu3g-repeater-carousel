@@ -1,6 +1,6 @@
 # LU3G Repeater Carousel
 
-Documentazione del plugin — versione 1.19.0
+Documentazione del plugin — versione 1.20.0
 
 Widget per Elementor che crea caroselli a scorrimento orizzontale: di card con testi, scritte direttamente in Elementor o lette da un campo repeater di JetEngine, oppure di sole immagini. Lo stesso widget funziona sia in una pagina qualsiasi sia in un template di CPT dove ogni post ha i suoi contenuti.
 
@@ -192,7 +192,7 @@ I controlli contrassegnati con **R** sono responsive: possono avere valori diver
 | Solo testo | Toglie i tag HTML dal titolo e dai campi JetEngine. I blocchi di testo delle card statiche mantengono sempre la formattazione dell'editor. |
 | Tronca il testo | Limita il testo a un numero di righe e aggiunge *Mostra di più*. |
 | Cosa troncare | Il titolo, il primo blocco di testo, un blocco preciso (dal secondo al quinto) o tutti i blocchi. Ogni testo troncato ha il suo *Mostra di più* e si apre da solo. Con il primo blocco o con tutti, le card senza blocchi troncano il titolo; con un blocco preciso, le card che non ce l'hanno restano intere. |
-| Righe visibili **R** | Quante righe restano visibili prima del taglio. |
+| Righe visibili **R** | Quante righe restano visibili prima del taglio. Con **0** il testo è nascosto del tutto e resta solo il pulsante per aprirlo. |
 | Etichette per espandere / richiudere | I testi del pulsante, di default *Mostra di più* / *Mostra meno*. |
 
 #### Layout
@@ -390,6 +390,18 @@ Su desktop le tre card riempiono la riga, senza frecce. Su mobile tornano carose
 2. **Tempo tra uno scorrimento e l'altro**: 4–5 secondi è un buon punto di partenza.
 3. Lascia attiva la pausa al passaggio del mouse.
 
+### Secondo testo nascosto dietro "Scopri di più"
+
+Per mostrare titolo e primo testo, e tenere il secondo blocco chiuso finché non lo si apre:
+
+1. *Opzioni del contenuto → Tronca il testo*: attivo.
+2. *Cosa troncare*: **Il secondo blocco di testo**.
+3. *Righe visibili*: **0**. Su mobile puoi dare un valore diverso, per esempio 0 anche lì o 2 per mostrarne un assaggio.
+4. *Etichetta per espandere*: per esempio `Scopri di più`; *Etichetta per richiudere*: `Chiudi`.
+5. Se il contenuto aperto non ci sta: *Layout → Altezza fissa* spento.
+
+Le card che non hanno il secondo blocco non mostrano il pulsante.
+
 ### Card con testo lungo e "Mostra di più"
 
 1. *Opzioni del contenuto*: attiva **Tronca il testo**.
@@ -541,6 +553,9 @@ CSS e JS sono registrati, non accodati: il widget li dichiara in `get_style_depe
 ---
 
 ## Cronologia delle versioni
+
+**1.20.0**
+- Righe visibili a 0: testo nascosto dietro il pulsante.
 
 **1.19.0**
 - Troncamento sui blocchi di testo successivi o su tutti.
